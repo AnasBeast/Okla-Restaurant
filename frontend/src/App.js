@@ -8,6 +8,8 @@ import AdminAjouterProduit from './screens/admin-ajout-produit';
 import AdminDashboard from './screens/admin-dashboard';
 import AdminModifierProduit from './screens/admin-modifier-produit';
 import Adminlogin from './screens/adminlogin';
+import Localisation from './screens/Localisation';
+import Contact from './screens/Contact';
 
 function App() {
   return (
@@ -16,7 +18,8 @@ function App() {
         
         <Route path="/" element={<Acceuil/>}/>
         <Route path="/menu" element={<Menu/>}/>
-        
+        <Route path="/localisation" element={<Localisation/>}/>
+        <Route path="/contact" element={<Contact/>}/>
       </Routes>
       <Routes>
         <Route path="/login" element={<Adminlogin/>}/>
