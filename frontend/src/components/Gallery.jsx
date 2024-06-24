@@ -79,7 +79,6 @@ const images = [
 
 export default function GalleryImages() {
     const [blogs,setBlogs] = useState([])
-    const [isLoading,setIsLoading] = useState(true)
      
     useEffect(() => {
         // Simulate an API call
@@ -88,7 +87,6 @@ export default function GalleryImages() {
            const { data } = await Axios.get(`${process.env.REACT_APP_DOMAIN}/api/blogs`);
            console.log(data)
            setBlogs(data.blogs)
-           setIsLoading(false);
 
           }catch (err) {
             console.log("error", err)
@@ -97,15 +95,6 @@ export default function GalleryImages() {
         fetchData();
         
       }, []);
-      if (isLoading) {
-        return (
-          <>
-            <Navbar/>
-            <Loadingscreen />
-            <Footer/>
-          </>
-        );
-      }
       var images = blogs.map((blog)=>({
         src:blog.image,
         width:"auto",
