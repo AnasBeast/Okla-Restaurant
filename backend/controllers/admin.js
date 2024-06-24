@@ -77,12 +77,10 @@ exports.loginUser = async (req , res , next)=>{
 
       // user
       res.status(200).json(user);
+    }else{
+      res.status(401).send("Invalid Credentials");
     }
     console.log(user)
-
-    res.status(400).json({
-        message : "Invalid Credentials"
-    })
   } catch (err) {
     console.log(err);
   }

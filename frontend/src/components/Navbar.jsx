@@ -12,7 +12,7 @@ const Navbar = () => {
               <Link to={"/"}>
                 <span className="sr-only">Lost No More</span>
                 <img
-                  className="h-10 w-auto sm:h-24"
+                  className="h-16 w-auto sm:h-24"
                   src="/assets/logo.png"
                   alt="logo"
                 />

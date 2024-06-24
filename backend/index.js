@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 
 const adminRoutes = require("./routes/admin");
 const productRoutes = require("./routes/product");
+const blogRoutes = require("./routes/blog");
 
 const dotenv = require('dotenv');
 
@@ -32,6 +33,7 @@ app.use((req, res, next) => {
 });
 app.use("/api/product", productRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/blogs", blogRoutes);
 
 app.listen(process.env.PORT || 8080, ()=>{
     console.log("listening on port 8080")
