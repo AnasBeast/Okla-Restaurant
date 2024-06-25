@@ -16,6 +16,7 @@ export default function AdminAjouterProduit() {
         const { data } = await Axios.post(`${process.env.REACT_APP_DOMAIN}/api/admin/checkuser`,{
           token:token
         });
+        console.log(data)
       }catch (err) {
         console.log("error", err)
         navigate('/login');
@@ -115,6 +116,9 @@ export default function AdminAjouterProduit() {
                         <option value="sandwich">Sandwich</option>
                         <option value="assiette">Assiette</option>
                         <option value="barquette">Barquette</option>
+                        <option value="café">café</option>
+                        <option value="crémerie">crémerie</option>
+                        <option value="pâtisserie">pâtisserie</option>
 
                       </select>
                   </div>

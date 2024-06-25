@@ -92,11 +92,9 @@ exports.checkUser = async (req , res , next)=>{
 try {
   // Get user input
   const token = req.body.token;
-
   // Validate user input
   jwt.verify(token, process.env.TOKEN_KEY, function(err, decoded) {
     if (err) {
-      console.log(err)
       return res.status(403).json({
         message : "Token expired, please login again !"
       });/*
@@ -106,6 +104,11 @@ try {
           expiredAt: 1408621000
         }
       */
+    }
+    else{
+      return res.status(200).json({
+        message : "User logged in!"
+      });
     }
   });
 } catch (err) {

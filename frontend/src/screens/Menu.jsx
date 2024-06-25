@@ -14,6 +14,9 @@ export default function Menu() {
     const [sandwichs,setSandwichs] = useState([])
     const [assiettes,setAssiettes] = useState([])
     const [barquettes,setBarquettes] = useState([])
+    const [cafes,setCafe] = useState([])
+    const [cremeries,setCremerie] = useState([])
+    const [patisseries,setPatisserie] = useState([])
     document.title = 'Restaurant Okla | Menu';
     useEffect(() => {
         // Simulate an API call
@@ -27,6 +30,9 @@ export default function Menu() {
            setSandwichs(data.products.filter((product)=>product.type==="sandwich"))
            setAssiettes(data.products.filter((product)=>product.type==="assiette"))
            setBarquettes(data.products.filter((product)=>product.type==="barquette"))
+           setCafe(data.products.filter((product)=>product.type==="cafe"))
+           setCremerie(data.products.filter((product)=>product.type==="cremerie"))
+           setPatisserie(data.products.filter((product)=>product.type==="patisserie"))
 
           }catch (err) {
             console.log("error", err)
@@ -198,6 +204,51 @@ export default function Menu() {
               <div className='flex flex-col gap-2'>
                 <h1 className='font-bold text-3xl text-green-700'>{barquette.title}</h1>
                 <p> {barquette.description}</p>
+              </div>
+            </div>
+          ))}
+        </section>
+        <section className='flex flex-col md:grid grid-cols-3 gap-4' id='barquettes'>
+          <h1 className="text-5xl font-bold title-font mb-4 text-gray-900 md:hidden">
+            café
+          </h1>
+          {/* Cafe */}
+          {cafes.map((cafe)=>(
+            <div className='flex items-center sm:items-stretch justify-items-center md:flex-col gap-4'>
+              <img src={cafe.bannerImg} alt="cafe" className='w-[145px] h-[100px] md:h-80 md:w-auto rounded-md hover:cursor-pointer'/>
+              <div className='flex flex-col gap-2'>
+                <h1 className='font-bold text-3xl text-green-700'>{cafe.title}</h1>
+                <p> {cafe.description}</p>
+              </div>
+            </div>
+          ))}
+        </section>
+        <section className='flex flex-col md:grid grid-cols-3 gap-4' id='barquettes'>
+          <h1 className="text-5xl font-bold title-font mb-4 text-gray-900 md:hidden">
+            Crémerie
+          </h1>
+          {/* Crémerie */}
+          {cremeries.map((cremerie)=>(
+            <div className='flex items-center sm:items-stretch justify-items-center md:flex-col gap-4'>
+              <img src={cremerie.bannerImg} alt="cremerie" className='w-[145px] h-[100px] md:h-80 md:w-auto rounded-md hover:cursor-pointer'/>
+              <div className='flex flex-col gap-2'>
+                <h1 className='font-bold text-3xl text-green-700'>{cremerie.title}</h1>
+                <p> {cremerie.description}</p>
+              </div>
+            </div>
+          ))}
+        </section>
+        <section className='flex flex-col md:grid grid-cols-3 gap-4' id='barquettes'>
+          <h1 className="text-5xl font-bold title-font mb-4 text-gray-900 md:hidden">
+            Pâtisserie
+          </h1>
+          {/* Pâtisserie */}
+          {patisseries.map((patisserie)=>(
+            <div className='flex items-center sm:items-stretch justify-items-center md:flex-col gap-4'>
+              <img src={patisserie.bannerImg} alt="patisserie" className='w-[145px] h-[100px] md:h-80 md:w-auto rounded-md hover:cursor-pointer'/>
+              <div className='flex flex-col gap-2'>
+                <h1 className='font-bold text-3xl text-green-700'>{patisserie.title}</h1>
+                <p> {patisserie.description}</p>
               </div>
             </div>
           ))}

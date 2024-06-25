@@ -138,6 +138,9 @@ export default function AdminModifierProduit() {
                         <option value="sandwich">Sandwich</option>
                         <option value="assiette">Assiette</option>
                         <option value="barquette">Barquette</option>
+                        <option value="cafe">café</option>
+                        <option value="cremerie">crémerie</option>
+                        <option value="patisserie">pâtisserie</option>
 
                       </select>
                   </div>
