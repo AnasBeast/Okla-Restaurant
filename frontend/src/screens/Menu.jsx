@@ -35,13 +35,13 @@ export default function Menu() {
            setCafe(data.products.filter((product)=>product.type==="cafe"))
            setCremerie(data.products.filter((product)=>product.type==="cremerie"))
            setPatisserie(data.products.filter((product)=>product.type==="patisserie"))
-
+           setIsLoading(false);
           }catch (err) {
             console.log("error", err)
           }
         };
         fetchData();
-        setIsLoading(false);
+        
         
       }, []);
       if (isLoading) {

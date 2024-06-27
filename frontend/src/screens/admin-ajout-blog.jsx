@@ -17,13 +17,14 @@ export default function AdminAjouterBlog() {
           token:token
         });
         console.log(data)
+        setIsLoading(false);
       }catch (err) {
         console.log("error", err)
         navigate('/login');
       }
     }
     loginUser();
-    setIsLoading(false);
+    
   }, []);
 
   if (isLoading) {

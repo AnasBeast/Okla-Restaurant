@@ -28,13 +28,13 @@ export default function AdminDashboard() {
           try {
            const { data } = await Axios.get(`${process.env.REACT_APP_DOMAIN}/api/product`);
            setProducts(data.products)
-
+           setIsLoading(false);
           }catch (err) {
             console.log("error", err)
           }
         };
         fetchData();
-        setIsLoading(false);
+        
         
       }, []);
       if (isLoading) {

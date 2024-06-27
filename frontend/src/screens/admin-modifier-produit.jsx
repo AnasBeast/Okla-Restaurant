@@ -40,14 +40,14 @@ export default function AdminModifierProduit() {
             list.options[i].selected = true
           }
         }
-        
+        setIsLoading(false);
       }catch (err) {
         console.log("error", err)
       }
     };
     
     fetchData();
-    setIsLoading(false);
+    
     
   }, []);
   if (isLoading) {

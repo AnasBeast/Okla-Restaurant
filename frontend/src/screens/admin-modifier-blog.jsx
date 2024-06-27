@@ -29,14 +29,14 @@ export default function AdminModifierBlog() {
       try {
         const { data } = await Axios.get(`${process.env.REACT_APP_DOMAIN}/api/blogs/${id}`);
         setProduct(data)
-        
+        setIsLoading(false);
       }catch (err) {
         console.log("error", err)
       }
     };
     
     fetchData();
-    setIsLoading(false);
+    
     
   }, []);
   if (isLoading) {
