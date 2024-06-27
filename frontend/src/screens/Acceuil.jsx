@@ -6,22 +6,12 @@ import GalleryImages from '../components/Gallery';
 import { Link } from 'react-router-dom';
 
 export default function Acceuil() {
-    const [isLoading,setIsLoading] = useState(true)
-    document.title = 'Restaurant Okla | Acceuil';
-    useEffect(() => {
-        // Simulate an API call
-        
-        setIsLoading(false);
-        
-      }, []);
-      if (isLoading) {
-        return <Loadingscreen />;
-    }
-    
+  document.title = 'Restaurant Okla | Acceuil';
+
   return (
     <>
       <Navbar/>
-      <div className='max-w-7xl mx-auto my-20'>
+      <div className='max-w-7xl mx-auto my-10 md:my-20'>
         
         <Link to="/menu">
           <GalleryImages/>

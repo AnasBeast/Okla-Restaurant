@@ -78,29 +78,33 @@ const images = [
  
 
 export default function GalleryImages() {
-    const [blogs,setBlogs] = useState([])
-     
-    useEffect(() => {
-        // Simulate an API call
-        const fetchData = async () => {
-          try {
-           const { data } = await Axios.get(`${process.env.REACT_APP_DOMAIN}/api/blogs`);
-           console.log(data)
-           setBlogs(data.blogs)
-
-          }catch (err) {
+   const [blogs,setBlogs] = useState([])
+   const [isLoading,setIsLoading] = useState(true)
+   
+   useEffect(() => {
+      // Simulate an API call
+      const fetchData = async () => {
+         try {
+            const { data } = await Axios.get(`${process.env.REACT_APP_DOMAIN}/api/blogs`);
+            console.log(data)
+            setBlogs(data.blogs)
+            setIsLoading(false);
+         }catch (err) {
             console.log("error", err)
-          }
-        };
-        fetchData();
-        
-      }, []);
-      var images = blogs.map((blog)=>({
-        src:blog.image,
-        width:"auto",
-        height:"auto"
-        }))
-      console.log(images)
-    return (
-    <Gallery images={images} enableImageSelection={false}/>
+         }
+      };
+      fetchData();
+   }, []);
+   if (isLoading) {
+      return <Loadingscreen />;
+   }
+   var images = blogs.map((blog)=>({
+      src:blog.image,
+      loading:"lazy",
+      width:"auto",
+      height:"auto"
+   }))
+   console.log(images)
+   return (
+   <Gallery images={images} enableImageSelection={false}/>
 )};

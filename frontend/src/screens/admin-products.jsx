@@ -3,7 +3,7 @@ import Axios from 'axios';
 import Loadingscreen from './Loadingscreen';
 import { useNavigate } from 'react-router-dom';
 
-export default function AdminDashboard() {
+export default function AdminProducts() {
     const [isLoading,setIsLoading] = useState(true)
     const [products,setProducts] = useState([])
     const token = localStorage.getItem("accessToken")
@@ -28,47 +28,57 @@ export default function AdminDashboard() {
           try {
            const { data } = await Axios.get(`${process.env.REACT_APP_DOMAIN}/api/product`);
            setProducts(data.products)
-
+           setIsLoading(false);
+           
           }catch (err) {
             console.log("error", err)
           }
         };
         fetchData();
-        setIsLoading(false);
+        
         
       }, []);
       if (isLoading) {
         return <Loadingscreen />;
     }
     
+    const editUser = async(e)=>{
+        e.preventDefault();
+        const id = e.target.id;
+        navigate(`/admin/modifier-product/${id}`)
+    }
 
+    const deleteUser = async(e)=>{
+        e.preventDefault();
+        const id = e.target.id;
+        try {
+            const { data } = await Axios.delete(`${process.env.REACT_APP_DOMAIN}/api/product/${id}?token=${token}`)
+            console.log(data)
+            alert(data.message)
+            window.location.reload()
+        }catch(err){
+            console.log(err)
+        }
+    }
   return (
     <div>
         <section class="mx-auto max-w-7xl sm:px-6 lg:px-8 mt-12">
-            <div class="px-4 sm:px-0 mb-4 flex flex-col gap-12 justify-between items-center">
-                <h2 class="text-sm md:text-xl font-medium text-gray-900" id="produits">Admin<span id='count'></span> </h2>
+            <div class="px-4 sm:px-0 mb-4 flex justify-between items-center">
+                <h2 class="text-sm md:text-xl font-medium text-gray-900" id="produits">Produits<span id='count'></span> </h2>
+
                 <a>
-                    <button 
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" 
+                    <button
+                    id="ajouter-blog"
                     type="button"
-                    onClick={()=>navigate("/admin/produits")}
+                    onClick={()=>navigate("/admin/ajouter-produit")}
+                    class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     >
-                        Produits de Menu
-                    </button>
-                    
-                </a>
-                <a>
-                    <button 
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" 
-                    type="button"
-                    onClick={()=>navigate("/admin/blogs")}
-                    >
-                        Acceuil
+                        Ajouter nouveau produit
                     </button>
                 </a>
 
             </div>
-            {/* <ul
+            <ul
                 class="mt-5 px-4 divide-y divide-gray-200 border-gray-200 sm:mt-0 sm:border-t-0"
                 id="list"
             >
@@ -78,8 +88,9 @@ export default function AdminDashboard() {
                         <div class="flex min-w-0 flex-1 items-center px-4 flex-col justify-center md:flex-row gap-4 md:gap-0">
                             <div class="flex-shrink-0 w-full md:w-auto"><img class="h-3/4 w-full md:h-12 md:w-24 rounded group-hover:opacity-75" 
                                 src={product.bannerImg} alt="produit"/>
-                            </div><div class="min-w-0 flex-1 px-4 flex flex-col md:grid md:grid-cols-4 md:items-center gap-2 md:gap-4">
-                            <div>
+                            </div>
+                            <div class="min-w-0 flex-1 px-4 flex flex-col md:grid md:grid-cols-4 md:items-center gap-2 md:gap-4">
+                                <div>
                                 <p class="md:truncate text-sm font-medium text-purple-600">{product.title}</p>
                                 <p class="mt-2 flex items-center text-sm text-gray-500">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="mr-1.5 h-5 w-5 flex-shrink-0 text-green-400"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"></path></svg>
@@ -108,7 +119,7 @@ export default function AdminDashboard() {
                     </div>
                 </li>
                 ))}
-            </ul> */}
+            </ul>
         </section>
     </div>
   )

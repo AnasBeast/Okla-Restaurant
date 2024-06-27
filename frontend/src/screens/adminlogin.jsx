@@ -39,7 +39,7 @@ export default function Adminlogin() {
     return (
       <>
        
-        <div className="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div className="flex min-h-full flex-col justify-center md:py-12 sm:px-6 lg:px-8">
         <Transition.Root show={open} as={Fragment}>
       <Dialog as="div" className="relative z-10" onClose={setOpen}>
         <Transition.Child

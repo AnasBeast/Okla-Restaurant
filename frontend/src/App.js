@@ -10,6 +10,10 @@ import AdminModifierProduit from './screens/admin-modifier-produit';
 import Adminlogin from './screens/adminlogin';
 import Localisation from './screens/Localisation';
 import Contact from './screens/Contact';
+import AdminAjouterBlog from './screens/admin-ajout-blog';
+import AdminBlogs from './screens/admin-blogs';
+import AdminProducts from './screens/admin-products';
+import AdminModifierBlog from './screens/admin-modifier-blog';
 
 function App() {
   return (
@@ -24,8 +28,12 @@ function App() {
       <Routes>
         <Route path="/login" element={<Adminlogin/>}/>
         <Route path="/admin" element={<AdminDashboard/>}/>
-        <Route path="/admin/ajouter" element={<AdminAjouterProduit/>}/>
-        <Route path="/admin/modifier/:id" element={<AdminModifierProduit/>}/>
+        <Route path="/admin/ajouter-produit" element={<AdminAjouterProduit/>}/>
+        <Route path="/admin/ajouter-blog" element={<AdminAjouterBlog/>}/>
+        <Route path="/admin/blogs" element={<AdminBlogs/>}/>
+        <Route path="/admin/produits" element={<AdminProducts/>}/>
+        <Route path="/admin/modifier-product/:id" element={<AdminModifierProduit/>}/>
+        <Route path="/admin/modifier-blog/:id" element={<AdminModifierBlog/>}/>
       </Routes>
     </Router>
       

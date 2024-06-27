@@ -107,7 +107,7 @@ const Navbar = () => {
         </Popover>
         <div class="fixed bottom-0 right-0 mb-4 mr-4 z-10">
             <div>
-                <a title="Follow me on twitter" href="tel:+5818827878" target="_blank" class="block w-16 h-16 rounded-full transition-all shadow hover:shadow-lg transform hover:scale-110 hover:rotate-12">
+                <a title="Follow me on twitter" href="tel:+5818827878" target="_blank" class="block w-12 h-12 md:w-16 md:h-16 rounded-full transition-all shadow hover:shadow-lg transform hover:scale-110 hover:rotate-12">
                     <img class="object-cover border-white border-2 object-center w-full h-full white p-3 rounded-full bg-green-900" src="/assets/call-icon.png"/>
                 </a>
             </div>

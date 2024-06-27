@@ -19,7 +19,7 @@ export default function Localisation() {
   return (
     <>
       <Navbar/>
-      <div className='max-w-7xl mx-auto my-20'>
+      <div className='max-w-7xl mx-auto my-10 md:my-20'>
         < h1 className="sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900">
           Localisation
         </h1>
