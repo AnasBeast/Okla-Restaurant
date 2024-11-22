@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom'
 const Navbar = () => {
   return (
     <header>
-        <Popover className="relative bg-green-700">
+        <Popover className="relative bg-green-600">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-6 sm:px-6 md:justify-start md:space-x-10 lg:px-8">
             <div className="flex justify-start lg:w-0 lg:flex-1">
               <Link to={"/"}>
@@ -25,19 +25,19 @@ const Navbar = () => {
               </Popover.Button>
             </div>
             <Popover.Group as="nav" className="hidden space-x-10 md:flex">
-              <Link to={"/"} className="text-base font-medium text-gray-200 hover:text-white group transition duration-300">
+              <Link to={"/"} className="text-base font-medium text-gray-100 hover:text-white group transition duration-300">
                 Acceuil
                 <span class="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-white"></span>
               </Link>
-              <Link to={"/menu"} className="text-base font-medium text-gray-200 hover:text-white group transition duration-300">
+              <Link to={"/menu"} className="text-base font-medium text-gray-100 hover:text-white group transition duration-300">
                 Menu
                 <span class="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-white"></span>
               </Link>
-              <Link to={"/localisation"} className="text-base font-medium text-gray-200 hover:text-white group transition duration-300">
+              <Link to={"/localisation"} className="text-base font-medium text-gray-100 hover:text-white group transition duration-300">
                 Localisation
                 <span class="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-white"></span>
               </Link>
-              <Link to={"/contact"} className="text-base font-medium text-gray-200 hover:text-white group transition duration-300">
+              <Link to={"/contact"} className="text-base font-medium text-gray-100 hover:text-white group transition duration-300">
                 Contactez-nous
                 <span class="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-white"></span>
               </Link>

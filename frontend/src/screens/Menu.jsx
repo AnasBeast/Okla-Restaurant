@@ -1,11 +1,104 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Loadingscreen from './Loadingscreen';
 import Axios from 'axios';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
-import styles from "../styles.css"
+
+
+const MenuItem = ({ item,index }) => (
+  <div
+    key={index}
+    className="rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105 justify-items-center flex-col gap-2 md:gap-4"
+  >
+    <div className="relative h-60">
+      {item.promo && (
+        <img
+          src="https://static.vecteezy.com/system/resources/previews/010/176/890/non_2x/promo-element-marketing-strategy-label-with-red-color-background-free-png.png"
+          alt="promo"
+          className="absolute z-10 w-24 md:w-48"
+        />
+      )}
+      <LazyLoadImage
+        src={item.bannerImg}
+        alt={item.name}
+        effect="blur"
+        wrapperProps={{
+          // If you need to, you can tweak the effect transition using the wrapper style.
+          style: { transitionDelay: "0.5s" },
+        }}
+        className="rounded-lg object-cover h-[240px] w-full md:h-60"
+        loading="lazy"
+      />
+    </div>
+    <div className="p-4">
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-xl font-semibold text-gray-800">{item.title}</h3>
+        <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-semibold">
+          {item.price}
+        </span>
+      </div>
+      <p className="text-gray-600 text-sm">{item.description}</p>
+    </div>
+  </div>
+);
+
+
+const MenuCategory = ({ items }) => {
+  const [showAll, setShowAll] = useState(false)
+  const displayedItems = showAll ? items : items.slice(0, 3)
+  const contentRef = useRef(null);
+  const [contentHeight, setContentHeight] = useState('auto');
+
+  useEffect(() => {
+    if (contentRef.current) {
+      const calculateHeight = () => {
+        const fullHeight = contentRef.current.scrollHeight;
+        const singleItemHeight = contentRef.current.children[0]?.offsetHeight || 0;
+        const collapsedHeight = Math.min(fullHeight, singleItemHeight * 3 + 64); // 64px for gaps
+
+        return showAll ? `${fullHeight}px` : `${collapsedHeight}px`;
+      };
+
+      // Set initial height
+      setContentHeight(calculateHeight());
+
+      // Use setTimeout to ensure smooth transition when collapsing
+      if (!showAll) {
+        setTimeout(() => {
+          setContentHeight(calculateHeight());
+        }, 0);
+      }
+    }
+  }, [showAll, items]);
+
+  return (
+    <div className="mb-12">
+      <div 
+        ref={contentRef}
+        className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 transition-[max-height] duration-500 ease-in-out"
+        style={{ maxHeight: contentHeight }}
+      >
+        {displayedItems.map((item,index) => (
+          <MenuItem key={index} item={item} />
+        ))}
+      </div>
+      {items.length > 3 && (
+        <div className="text-center mt-8">
+          <button
+            onClick={() => setShowAll(!showAll)}
+            variant="outline"
+            className="bg-green-600 hover:bg-green-700  text-white transition-colors duration-300 p-4 rounded-lg"
+          >
+            {showAll ? "Voir moins" : "Voir plus"}
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 
 export default function Menu() {
     const [isLoading,setIsLoading] = useState(true)
@@ -55,10 +148,10 @@ export default function Menu() {
       }
 
   return (
-    <>
+    <div className='bg-green-50'>
     <Navbar/>
-    <div className='md:max-w-7xl mx-auto my-8 md:my-20 flex flex-col gap-8 md:gap-20'>
-      <div className='hidden md:grid w-11/12 mx-auto  grid-cols-6 bg-green-600 border-green-600 border-2 text-center'>
+    <div className='md:max-w-7xl mx-auto my-8 md:my-20 flex flex-col gap-8 md:gap-20 '>
+      <div className='hidden w-full md:grid mx-auto  grid-cols-6 bg-green-600 border-green-600 border-2 text-center'>
         <div>
           <a href="#burgers">
             <button className='text-white text-lg font-medium hover:bg-white hover:text-green-600 py-20 w-full h-full'>
@@ -119,304 +212,75 @@ export default function Menu() {
           </ul>
         </div>
       </div>
-      <div className="flex flex-col gap-20 bg-gray-100 py-10 px-2 md:w-11/12 mx-auto md:p-0 md:bg-white max-w-full">
-        <section className='flex flex-col md:grid grid-cols-3 gap-4' id='burgers'>
+
+
+      <div className="flex flex-col gap-20  py-10 px-2 md:max-w-7xl mx-auto md:p-0 ">
+        <section className='flex flex-col gap-8' id='burgers'>
           <h1 className="text-3xl md:text-5xl font-bold title-font mb-4 text-gray-900 md:hidden">
             Burgers
           </h1>
           {/* Burgers */}
-          {burgers.map((burger)=>(
-            <div className='flex items-center sm:items-stretch justify-items-center md:flex-col gap-2 md:gap-4'>
-              <div>
-                {burger.promo &&
-                <img 
-                src="https://static.vecteezy.com/system/resources/previews/010/176/890/non_2x/promo-element-marketing-strategy-label-with-red-color-background-free-png.png" 
-                alt="promo" 
-                className='absolute z-10 w-24 md:w-48'
-                />}
-                <LazyLoadImage
-                  alt="burger"
-                  effect="blur"
-                  wrapperProps={{
-                      // If you need to, you can tweak the effect transition using the wrapper style.
-                      style: {transitionDelay: "0.5s"},
-                  }}
-                  className='h-[120px] md:w-full md:h-80 rounded-md hover:cursor-pointer'
-                  src={burger.bannerImg}
-                />
-              </div>
-              <div className='flex flex-col gap-2 max-w-max'>
-                <h1 className='font-bold text-2xl md:text-3xl text-green-700'>{burger.title}</h1>
-                <p className='text-lg line-clamp-3'> {burger.description}</p>
-              </div>
-            </div>
-          ))}
+          <MenuCategory items={burgers} />
         </section>
-        <section className='flex flex-col md:grid grid-cols-3 gap-4' id='pizzas'>
+        <section className='flex flex-col gap-8' id='pizzas'>
           <h1 className="text-3xl md:text-5xl font-bold title-font mb-4 text-gray-900 md:hidden">
             Pizzas
           </h1>
           {/* Pizzas */}
-          {pizzas.map((pizza)=>(
-            <div className='flex items-center sm:items-stretch justify-items-center md:flex-col gap-4'>
-              <div>
-                {pizza.promo &&
-                <img 
-                src="https://static.vecteezy.com/system/resources/previews/010/176/890/non_2x/promo-element-marketing-strategy-label-with-red-color-background-free-png.png" 
-                alt="promo" 
-                className='absolute z-10 w-24 md:w-48'
-                />}
-                <LazyLoadImage
-                  alt="pizza"
-                  effect="blur"
-                  wrapperProps={{
-                      // If you need to, you can tweak the effect transition using the wrapper style.
-                      style: {transitionDelay: "0.5s"},
-                  }}
-                  className='h-[120px] md:h-80 rounded-md hover:cursor-pointer'
-                  src={pizza.bannerImg}
-                />
-              </div>
-              <div className='flex flex-col gap-2'>
-                <h1 className='font-bold text-2xl md:text-3xl text-green-700'>{pizza.title}</h1>
-                <p className='text-lg line-clamp-3'> {pizza.description}</p>
-              </div>
-            </div>
-          ))}
+          <MenuCategory items={pizzas} />
         </section>
-        <section className='flex flex-col md:grid grid-cols-3 gap-4' id='poutines'>
+        <section className='flex flex-col gap-8' id='poutines'>
           <h1 className="text-3xl md:text-5xl font-bold title-font mb-4 text-gray-900 md:hidden">
             Poutines
           </h1>
           {/* Poutines */}
-          {poutines.map((poutine)=>(
-            <div className='flex items-center sm:items-stretch justify-items-center md:flex-col gap-4'>
-              <div>
-                {poutine.promo &&
-                <img 
-                src="https://static.vecteezy.com/system/resources/previews/010/176/890/non_2x/promo-element-marketing-strategy-label-with-red-color-background-free-png.png" 
-                alt="promo" 
-                className='absolute z-10 w-24 md:w-48'
-                />}
-                <LazyLoadImage
-                  alt="poutine"
-                  effect="blur"
-                  wrapperProps={{
-                      // If you need to, you can tweak the effect transition using the wrapper style.
-                      style: {transitionDelay: "0.5s"},
-                  }}
-                  className='h-[120px] md:h-80 rounded-md hover:cursor-pointer'
-                  src={poutine.bannerImg}
-                />
-              </div>
-              <div className='flex flex-col gap-2'>
-                <h1 className='font-bold text-2xl md:text-3xl text-green-700'>{poutine.title}</h1>
-                <p className='text-lg line-clamp-3'> {poutine.description}</p>
-              </div>
-            </div>
-          ))}
+          <MenuCategory items={poutines} />
         </section>
-        <section className='flex flex-col md:grid grid-cols-3 gap-4' id='sandwichs'>
+        <section className='flex flex-col gap-8' id='sandwichs'>
           <h1 className="text-3xl md:text-5xl font-bold title-font mb-4 text-gray-900 md:hidden">
             Sandwichs
           </h1>
           {/* Sandwichs */}
-          {sandwichs.map((sandwich)=>(
-            <div className='flex items-center sm:items-stretch justify-items-center md:flex-col gap-4'>
-              <div>
-                {sandwich.promo &&
-                <img 
-                  src="https://static.vecteezy.com/system/resources/previews/010/176/890/non_2x/promo-element-marketing-strategy-label-with-red-color-background-free-png.png" 
-                  alt="promo" 
-                  className='absolute z-10 w-24 md:w-48'
-                />}
-                <LazyLoadImage
-                  alt="sandwich"
-                  effect="blur"
-                  wrapperProps={{
-                      // If you need to, you can tweak the effect transition using the wrapper style.
-                      style: {transitionDelay: "0.5s"},
-                  }}
-                  className='h-[120px] md:h-80 rounded-md hover:cursor-pointer'
-                  src={sandwich.bannerImg}
-                />
-              </div>
-              <div className='flex flex-col gap-2'>
-                <h1 className='font-bold text-2xl md:text-3xl text-green-700'>{sandwich.title}</h1>
-                <p className='text-lg line-clamp-3'> {sandwich.description}</p>
-              </div>
-            </div>
-          ))}
+          <MenuCategory items={sandwichs} />
         </section>
-        <section className='flex flex-col md:grid grid-cols-3 gap-4' id='assiettes'>
+        <section className='flex flex-col gap-8' id='assiettes'>
           <h1 className="text-3xl md:text-5xl font-bold title-font mb-4 text-gray-900 md:hidden">
             Assiettes
           </h1>
           {/* Assiettes */}
-          {assiettes.map((assiette)=>(
-            <div className='flex items-center sm:items-stretch justify-items-center md:flex-col gap-4'>
-              <div>
-                {assiette.promo &&
-                <img 
-                  src="https://static.vecteezy.com/system/resources/previews/010/176/890/non_2x/promo-element-marketing-strategy-label-with-red-color-background-free-png.png" 
-                  alt="promo" 
-                  className='absolute z-10 w-24 md:w-48'
-                />}
-                <LazyLoadImage
-                  alt="assiette"
-                  effect="blur"
-                  wrapperProps={{
-                      // If you need to, you can tweak the effect transition using the wrapper style.
-                      style: {transitionDelay: "0.5s"},
-                  }}
-                  className='h-[120px] md:h-80 rounded-md hover:cursor-pointer'
-                  src={assiette.bannerImg}
-                />
-              </div>
-              
-              <div className='flex flex-col gap-2'>
-                <h1 className='font-bold text-2xl md:text-3xl text-green-700'>{assiette.title}</h1>
-                <p className='text-lg line-clamp-3'> {assiette.description}</p>
-              </div>
-            </div>
-          ))}
+          <MenuCategory items={assiettes} />
         </section>
-        <section className='flex flex-col md:grid grid-cols-3 gap-4' id='barquettes'>
+        <section className='flex flex-col gap-8' id='barquettes'>
           <h1 className="text-3xl md:text-5xl font-bold title-font mb-4 text-gray-900 md:hidden">
             Barquettes
           </h1>
           {/* Barquettes */}
-          {barquettes.map((barquette)=>(
-            <div className='flex items-center sm:items-stretch justify-items-center md:flex-col gap-4'>
-              <div>
-                {barquette.promo &&
-                <img 
-                  src="https://static.vecteezy.com/system/resources/previews/010/176/890/non_2x/promo-element-marketing-strategy-label-with-red-color-background-free-png.png" 
-                  alt="promo" 
-                  className='absolute z-10 w-24 md:w-48'
-                />}
-                <LazyLoadImage
-                  alt="barquette"
-                  effect="blur"
-                  wrapperProps={{
-                      // If you need to, you can tweak the effect transition using the wrapper style.
-                      style: {transitionDelay: "0.5s"},
-                  }}
-                  className='h-[120px] md:h-80 rounded-md hover:cursor-pointer'
-                  src={barquette.bannerImg}
-                />
-              </div>
-              
-              <div className='flex flex-col gap-2'>
-                <h1 className='font-bold text-2xl md:text-3xl text-green-700'>{barquette.title}</h1>
-                <p className='text-lg line-clamp-3'> {barquette.description}</p>
-              </div>
-            </div>
-          ))}
+          <MenuCategory items={barquettes} />
         </section>
-        {cafes.length!==0 && <section className='flex flex-col md:grid grid-cols-3 gap-4' id='barquettes'>
+        {cafes.length!==0 && <section className='flex flex-col gap-8' id='cafes'>
           <h1 className="text-3xl md:text-5xl font-bold title-font mb-4 text-gray-900 md:hidden">
             café
           </h1>
           {/* Cafe */}
-          {cafes.map((cafe)=>(
-            <div className='flex items-center sm:items-stretch justify-items-center md:flex-col gap-4'>
-              <div>
-                {cafe.promo &&
-                <img 
-                  src="https://static.vecteezy.com/system/resources/previews/010/176/890/non_2x/promo-element-marketing-strategy-label-with-red-color-background-free-png.png" 
-                  alt="promo" 
-                  className='absolute z-10 w-24 md:w-48'
-                />}
-                <LazyLoadImage
-                  alt="cafe"
-                  effect="blur"
-                  wrapperProps={{
-                      // If you need to, you can tweak the effect transition using the wrapper style.
-                      style: {transitionDelay: "0.5s"},
-                  }}
-                  className='h-[120px] md:h-80 rounded-md hover:cursor-pointer'
-                  src={cafe.bannerImg}
-                />
-              </div>
-              
-              <div className='flex flex-col gap-2'>
-                <h1 className='font-bold text-2xl md:text-3xl text-green-700'>{cafe.title}</h1>
-                <p className='text-lg line-clamp-3'> {cafe.description}</p>
-              </div>
-            </div>
-          ))}
+          <MenuCategory items={cafes} />
         </section>}
-        {cremeries.length!==0 && <section className='flex flex-col md:grid grid-cols-3 gap-4' id='barquettes'>
+        {cremeries.length!==0 && <section className='flex flex-col gap-8' id='cremeries'>
           <h1 className="text-3xl md:text-5xl font-bold title-font mb-4 text-gray-900 md:hidden">
             Crémerie
           </h1>
           {/* Crémerie */}
-          {cremeries.map((cremerie)=>(
-            <div className='flex items-center sm:items-stretch justify-items-center md:flex-col gap-4'>
-              <div>
-                {cremerie.promo &&
-                <img 
-                  src="https://static.vecteezy.com/system/resources/previews/010/176/890/non_2x/promo-element-marketing-strategy-label-with-red-color-background-free-png.png" 
-                  alt="promo" 
-                  className='absolute z-10 w-24 md:w-48'
-                />}
-                <LazyLoadImage
-                  alt="cremerie"
-                  effect="blur"
-                  wrapperProps={{
-                      // If you need to, you can tweak the effect transition using the wrapper style.
-                      style: {transitionDelay: "0.5s"},
-                  }}
-                  className='h-[120px] md:h-80 rounded-md hover:cursor-pointer'
-                  src={cremerie.bannerImg}
-                />
-              </div>
-              
-              <div className='flex flex-col gap-2'>
-                <h1 className='font-bold text-2xl md:text-3xl text-green-700'>{cremerie.title}</h1>
-                <p className='text-lg line-clamp-3'> {cremerie.description}</p>
-              </div>
-            </div>
-          ))}
+          <MenuCategory items={cremeries} />
         </section>}
-        {patisseries.length!==0 &&<section className='flex flex-col md:grid grid-cols-3 gap-4' id='barquettes'>
+        {patisseries.length!==0 &&<section className='flex flex-col gap-8' id='patisseries'>
           <h1 className="text-3xl md:text-5xl font-bold title-font mb-4 text-gray-900 md:hidden">
             Pâtisserie
           </h1>
           {/* Pâtisserie */}
-          {patisseries.map((patisserie)=>(
-            <div className='flex items-center sm:items-stretch justify-items-center md:flex-col gap-4'>
-              <div>
-                {patisserie.promo &&
-                <img 
-                  src="https://static.vecteezy.com/system/resources/previews/010/176/890/non_2x/promo-element-marketing-strategy-label-with-red-color-background-free-png.png" 
-                  alt="promo" 
-                  className='absolute z-10 w-24 md:w-48'
-                />}
-                <LazyLoadImage
-                  alt="patisserie"
-                  effect="blur"
-                  id='burger'
-                  wrapperProps={{
-                      // If you need to, you can tweak the effect transition using the wrapper style.
-                      style: {transitionDelay: "0.5s"},
-                  }}
-                  className='h-[120px] md:h-80 rounded-md hover:cursor-pointer'
-                  src={patisserie.bannerImg}
-                />
-              </div>
-              
-              <div className='flex flex-col gap-2'>
-                <h1 className='font-bold text-2xl md:text-3xl text-green-700'>{patisserie.title}</h1>
-                <p className='text-lg line-clamp-3'> {patisserie.description}</p>
-              </div>
-            </div>
-          ))}
+          <MenuCategory items={patisseries} />
         </section>}
       </div>
     </div>
     <Footer/>
-    </>
+    </div>
   )
 }

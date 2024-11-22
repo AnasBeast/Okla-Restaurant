@@ -1,9 +1,0 @@
-.lazy-load-image-loaded{
-    width: 130px;
-    display: block;
-}
-@media screen and (min-width:768px) {
-    .lazy-load-image-loaded{
-        width: 100%;
-    }
-}

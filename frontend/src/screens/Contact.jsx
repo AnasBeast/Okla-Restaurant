@@ -17,7 +17,7 @@ export default function Contact() {
     }
     
   return (
-    <>
+    <div className='bg-green-50'>
       <Navbar/>
       <div className='max-w-7xl mx-auto my-10 md:my-20'>
           <div>
@@ -158,7 +158,7 @@ export default function Contact() {
           </div>
       </div>
       <Footer/>
-    </>
+    </div>
     
   )
 }
