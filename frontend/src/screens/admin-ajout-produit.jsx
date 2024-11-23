@@ -30,37 +30,45 @@ export default function AdminAjouterProduit() {
   if (isLoading) {
     return <Loadingscreen />;
   }
+  
   const handleSumbit=async(e)=>{
     e.preventDefault();
-    const title = document.getElementById("product-name").value
-    const description = document.getElementById("description").value
-    const type = document.getElementById("types").value
-    const bannerImg = document.getElementById("product-img").value
-    const promo = document.getElementById("promo").checked
+    const title = document.getElementById("product-name").value;
+    const description = document.getElementById("description").value;
+    const type = document.getElementById("types").value;
+    const bannerImg = document.getElementById("product-img").files[0];
+    const promo = document.getElementById("promo").checked;
     setAjouter("Loading...")
+    
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('description', description);
+    formData.append('type', type);
+    formData.append('bannerImg', bannerImg);
+    formData.append('promo', promo);
 
-    await Axios.post(`${process.env.REACT_APP_DOMAIN}/api/product`,{
-      title,
-      description,
-      bannerImg,
-      type,
-      promo,
-      token
-    })
-    .then(({data})=>{
-      console.log(data.message)
-      alert(data.message)
-      navigate('/admin')
-      setAjouter("Ajouter")
-    })
-    .catch((err)=>{
-      console.log(err)
-      alert(err)
-      setAjouter("Ajouter")
-    })
-
-
-  }
+    try {
+      const { data } = await Axios.post(
+        `${process.env.REACT_APP_DOMAIN}/api/product`,
+        formData, // Pass the FormData object as the body
+        {
+          headers: {
+            "Content-Type": "multipart/form-data", // Set the appropriate Content-Type
+            "x-access-token" : token
+          },
+        }
+      );
+  
+      console.log(data.message);
+      alert(data.message);
+      navigate("/admin");
+      setAjouter("Ajouter");
+    } catch (err) {
+      console.error(err);
+      alert("Error: Could not add the product.");
+      setAjouter("Ajouter");
+    }
+  };
   return (
     <div>
       <section class=" sm:px-6 lg:px-8 mt-12">
@@ -127,8 +135,9 @@ export default function AdminAjouterProduit() {
                 <div>
                   <label for="product-img" class="block text-sm font-medium text-gray-900">Lien de l'image du Produit</label>
                   <div class="mt-1">
-                    <input type="text" name="product-img" id="product-img"
+                    <input type="file" name="product-img" id="product-img"
                       class="block w-full h-8 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      accept="image/png, image/gif, image/jpeg"
                       required 
                       placeholder="https://imgur.com/myfr9j5.jpg"
                       />

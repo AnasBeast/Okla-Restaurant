@@ -32,7 +32,7 @@ export default function Adminlogin() {
           setSign('Login');
         } catch (err) {
           console.log("Error", err, "error");
-          alert(err.response.data.message)
+          alert(err.response.data)
           setSign('Login');
         }
       };

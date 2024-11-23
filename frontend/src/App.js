@@ -14,10 +14,12 @@ import AdminAjouterBlog from './screens/admin-ajout-blog';
 import AdminBlogs from './screens/admin-blogs';
 import AdminProducts from './screens/admin-products';
 import AdminModifierBlog from './screens/admin-modifier-blog';
+import ScrollToTop from './components/ScrollToTop';
 
 function App() {
   return (
     <Router>
+      <ScrollToTop /> {/* Ensures smooth scroll */}
       <Routes>
         
         <Route path="/" element={<Acceuil/>}/>
