@@ -29,7 +29,7 @@ export default function Localisation() {
     <div className='bg-green-50'>
       <Navbar/>
       <div className='max-w-7xl mx-auto my-10 md:my-20'>
-        < h1 className="sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900">
+        <h1 className="text-4xl md:text-5xl font-bold text-green-800 mb-6">
           Localisation
         </h1>
         <div className='aspect-video relative'>

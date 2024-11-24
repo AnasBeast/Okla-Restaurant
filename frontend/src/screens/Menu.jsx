@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
+import MobileMenuScroller from '../components/MobileScroller';
 
 
 const MenuItem = ({ item,index }) => (
@@ -18,17 +19,19 @@ const MenuItem = ({ item,index }) => (
           src="https://static.vecteezy.com/system/resources/previews/010/176/890/non_2x/promo-element-marketing-strategy-label-with-red-color-background-free-png.png"
           alt="promo"
           className="absolute z-10 w-24 md:w-48"
-        />
+          
+          />
       )}
       <LazyLoadImage
         src={item.bannerImg}
-        alt={item.name}
+        alt={item.title}
         effect="blur"
         wrapperProps={{
           // If you need to, you can tweak the effect transition using the wrapper style.
-          style: { transitionDelay: "0.5s" },
+          style: { transitionDelay: "0.25s" },
         }}
         className="rounded-lg object-cover h-[240px] w-full md:h-60"
+        placeholderSrc={item.bannerImg}
         loading="lazy"
       />
     </div>
@@ -197,21 +200,7 @@ export default function Menu() {
       </div>
       
 
-      <div className='flex flex-col bg-gray-50 items-center md:hidden py-4'>
-        <h1 className="sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900">
-          Menu Okla
-        </h1>
-        <div className='w-full overflow-auto'>
-          <ul className='flex gap-4 w-max px-4'>
-            <li><a href='#burgers'>Burger Okla</a></li>
-            <li><a href='#pizzas'>MINI PIZZA 6PO</a></li>
-            <li><a href='#poutines'>POUTINE OKLA</a></li>
-            <li><a href='#sandwichs'>SANDWICH OKLA</a></li>
-            <li><a href='#assiettes'>LES ASSIETTES</a></li>
-            <li><a href='#barquettes'>BARQUETTES PATATES</a></li>
-          </ul>
-        </div>
-      </div>
+      <MobileMenuScroller/>
 
 
       <div className="flex flex-col gap-20  py-10 px-2 md:max-w-7xl mx-auto md:p-0 ">
