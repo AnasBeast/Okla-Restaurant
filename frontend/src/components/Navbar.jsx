@@ -29,11 +29,11 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 md:py-6 md:space-x-10">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center justify-between w-5/6">
-            <Link to="/" className="flex-shrink-0">
+            <Link to="/">
               <img
-                className="h-12 w-auto sm:h-24 bg-white rounded-full p-2 transition-transform duration-300 hover:scale-105"
+                className="h-16 w-auto sm:h-24 bg-white rounded-full p-2"
                 src="/assets/logo.png"
-                alt="Restaurant Okla"
+                alt="Restaurant Okla logo"
               />
             </Link>
             

@@ -13,7 +13,7 @@ const MenuItem = ({ item,index }) => (
     key={index}
     className="rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105 justify-items-center flex-col gap-2 md:gap-4"
   >
-    <div className="relative h-60">
+    <div className="relative h-60 w-full object-contain">
       {item.promo && (
         <img
           src="https://static.vecteezy.com/system/resources/previews/010/176/890/non_2x/promo-element-marketing-strategy-label-with-red-color-background-free-png.png"
