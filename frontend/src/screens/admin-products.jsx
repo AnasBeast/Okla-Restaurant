@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
   Plus,
@@ -8,65 +8,76 @@ import {
   Trash2,
   Package,
   CheckCircle,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react";
-import Loadingscreen, { ProductGridSkeleton } from "./Loadingscreen";
+import { ProductGridSkeleton } from "./Loadingscreen";
 import { useProducts, useDocumentTitle } from "../hooks";
 import { useToast } from "../components/Toast";
 import { useConfirm } from "../components/ConfirmDialog";
 import { PRODUCT_TYPES } from "../config/constants";
+import { Card, CardContent } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
 
 // Product Card Component
-const ProductCard = ({ product, onEdit, onDelete }) => {
+const ProductCard = ({ product, onEdit, onDelete, index }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+      exit={{ opacity: 0, scale: 0.95 }}
+      transition={{ delay: index * 0.05 }}
     >
-      <div className="relative h-48">
-        {product.promo && (
-          <div className="absolute top-2 left-2 z-10 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
-            PROMO
+      <Card className="overflow-hidden border-0 shadow-soft hover-lift group">
+        <div className="relative h-48 overflow-hidden">
+          {product.promo && (
+            <Badge variant="destructive" className="absolute top-3 left-3 z-10">
+              PROMO
+            </Badge>
+          )}
+          <img
+            src={product.bannerImg}
+            alt={product.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        </div>
+        <CardContent className="p-4">
+          <h3 className="font-semibold text-gray-900 truncate">
+            {product.title}
+          </h3>
+          <div className="flex items-center gap-2 mt-2">
+            <Badge variant="success" className="gap-1">
+              <CheckCircle className="w-3 h-3" />
+              {product.type}
+            </Badge>
           </div>
-        )}
-        <img
-          src={product.bannerImg}
-          alt={product.title}
-          className="w-full h-full object-cover"
-          loading="lazy"
-        />
-      </div>
-      <div className="p-4">
-        <h3 className="font-semibold text-gray-900 truncate">
-          {product.title}
-        </h3>
-        <div className="flex items-center gap-2 mt-1">
-          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-            <CheckCircle className="w-3 h-3 mr-1" />
-            {product.type}
-          </span>
-        </div>
-        <p className="text-sm text-gray-500 mt-2 line-clamp-2">
-          {product.description}
-        </p>
+          <p className="text-sm text-gray-500 mt-2 line-clamp-2">
+            {product.description}
+          </p>
 
-        <div className="flex gap-2 mt-4">
-          <button
-            onClick={() => onEdit(product._id)}
-            className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-          >
-            <Edit className="w-4 h-4" />
-            Modifier
-          </button>
-          <button
-            onClick={() => onDelete(product._id)}
-            className="flex items-center justify-center px-3 py-2 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600 transition-colors"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
+          <div className="flex gap-2 mt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onEdit(product._id)}
+              className="flex-1 gap-1"
+            >
+              <Edit className="w-4 h-4" />
+              Modifier
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => onDelete(product._id)}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </motion.div>
   );
 };
@@ -76,25 +87,33 @@ const ProductSection = ({ title, products, onEdit, onDelete }) => {
   if (products.length === 0) return null;
 
   return (
-    <div className="mb-10">
-      <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-        <Package className="w-5 h-5 text-green-600" />
-        {title}
-        <span className="text-sm font-normal text-gray-500">
-          ({products.length})
-        </span>
-      </h2>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {products.map((product) => (
-          <ProductCard
-            key={product._id}
-            product={product}
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
-        ))}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="mb-10"
+    >
+      <div className="flex items-center gap-3 mb-4">
+        <div className="p-2 bg-green-100 rounded-lg">
+          <Package className="w-5 h-5 text-green-600" />
+        </div>
+        <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+        <Badge variant="secondary">{products.length}</Badge>
       </div>
-    </div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <AnimatePresence>
+          {products.map((product, index) => (
+            <ProductCard
+              key={product._id}
+              product={product}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              index={index}
+            />
+          ))}
+        </AnimatePresence>
+      </div>
+    </motion.div>
   );
 };
 
@@ -142,7 +161,7 @@ export default function AdminProducts() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-8">
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white p-8">
         <div className="max-w-7xl mx-auto">
           <ProductGridSkeleton count={8} />
         </div>
@@ -152,33 +171,44 @@ export default function AdminProducts() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">{error}</p>
-          <button
-            onClick={fetchProducts}
-            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-          >
-            Réessayer
-          </button>
-        </div>
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center">
+        <Card className="max-w-md border-0 shadow-soft">
+          <CardContent className="p-8 text-center">
+            <div className="p-4 bg-red-100 rounded-full w-fit mx-auto mb-4">
+              <AlertCircle className="w-8 h-8 text-red-600" />
+            </div>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">
+              Erreur de chargement
+            </h2>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <Button
+              onClick={fetchProducts}
+              variant="gradient"
+              className="gap-2"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Réessayer
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-10">
+      <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-10 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => navigate("/admin")}
-                className="p-2 hover:bg-gray-100 rounded-md transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
-              </button>
+              </Button>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">
                   Gestion des Produits
@@ -188,13 +218,14 @@ export default function AdminProducts() {
                 </p>
               </div>
             </div>
-            <button
+            <Button
+              variant="gradient"
               onClick={() => navigate("/admin/produit/nouveau")}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+              className="gap-2"
             >
               <Plus className="w-4 h-4" />
               Nouveau produit
-            </button>
+            </Button>
           </div>
         </div>
       </header>
@@ -202,22 +233,30 @@ export default function AdminProducts() {
       {/* Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {products.length === 0 ? (
-          <div className="text-center py-20">
-            <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-20"
+          >
+            <div className="p-6 bg-gray-100 rounded-full w-fit mx-auto mb-6">
+              <Package className="w-16 h-16 text-gray-400" />
+            </div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
               Aucun produit
             </h2>
             <p className="text-gray-500 mb-6">
               Commencez par ajouter votre premier produit
             </p>
-            <button
+            <Button
+              variant="gradient"
+              size="lg"
               onClick={() => navigate("/admin/ajouter-produit")}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+              className="gap-2"
             >
               <Plus className="w-5 h-5" />
               Ajouter un produit
-            </button>
-          </div>
+            </Button>
+          </motion.div>
         ) : (
           <>
             {PRODUCT_TYPES.map(({ value, label }) => (

@@ -1,10 +1,13 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { LockClosedIcon } from "@heroicons/react/20/solid";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { Lock, Loader2, Mail, ArrowRight } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../components/Toast";
 import { useDocumentTitle } from "../hooks";
+import { GlassCard } from "../components/ui/card";
+import { Input, Label } from "../components/ui/input";
+import { Button } from "../components/ui/button";
 
 export default function Adminlogin() {
   const [email, setEmail] = useState("");
@@ -53,23 +56,32 @@ export default function Adminlogin() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center bg-gradient-to-br from-green-50 to-green-100 py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex flex-col justify-center bg-gradient-to-br from-green-50 via-white to-green-100 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-green-200/30 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-green-300/20 rounded-full blur-3xl" />
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="sm:mx-auto sm:w-full sm:max-w-md"
+        className="sm:mx-auto sm:w-full sm:max-w-md text-center relative z-10"
       >
-        <img
-          className="mx-auto h-20 w-auto"
+        <motion.img
+          initial={{ scale: 0.8 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="mx-auto h-24 w-auto drop-shadow-lg"
           src="/assets/logo.png"
           alt="Restaurant Okla"
         />
-        <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-          Connexion Admin
+        <h2 className="mt-6 text-3xl font-bold tracking-tight text-gray-900">
+          Connexion <span className="text-gradient">Admin</span>
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Accédez au tableau de bord
+        <p className="mt-2 text-sm text-gray-600">
+          Accédez au tableau de bord de gestion
         </p>
       </motion.div>
 
@@ -77,95 +89,82 @@ export default function Adminlogin() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="mt-8 sm:mx-auto sm:w-full sm:max-w-md"
+        className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10"
       >
-        <div className="bg-white py-8 px-4 shadow-xl rounded-lg sm:px-10">
+        <GlassCard className="py-8 px-6 sm:px-10">
           <form className="space-y-6" onSubmit={submitHandler}>
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
+            <div className="space-y-2">
+              <Label htmlFor="email" className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-green-600" />
                 Adresse email
-              </label>
-              <div className="mt-1">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm transition-colors"
-                  placeholder="admin@example.com"
-                />
-              </div>
+              </Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@example.com"
+              />
             </div>
 
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
+            <div className="space-y-2">
+              <Label htmlFor="password" className="flex items-center gap-2">
+                <Lock className="w-4 h-4 text-green-600" />
                 Mot de passe
-              </label>
-              <div className="mt-1">
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-green-500 focus:outline-none focus:ring-green-500 sm:text-sm transition-colors"
-                  placeholder="••••••••"
-                />
-              </div>
+              </Label>
+              <Input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+              />
             </div>
 
-            <div>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="flex w-full justify-center items-center gap-2 rounded-md border border-transparent bg-green-600 py-2.5 px-4 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-              >
-                {isSubmitting ? (
-                  <>
-                    <svg
-                      className="animate-spin h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Connexion...
-                  </>
-                ) : (
-                  <>
-                    <LockClosedIcon className="h-5 w-5" />
-                    Se connecter
-                  </>
-                )}
-              </button>
-            </div>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              variant="gradient"
+              size="lg"
+              className="w-full gap-2"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Connexion...
+                </>
+              ) : (
+                <>
+                  Se connecter
+                  <ArrowRight className="h-5 w-5" />
+                </>
+              )}
+            </Button>
           </form>
-        </div>
+
+          <div className="mt-6 pt-6 border-t border-gray-200/50">
+            <p className="text-xs text-center text-gray-500">
+              Accès réservé aux administrateurs autorisés
+            </p>
+          </div>
+        </GlassCard>
       </motion.div>
+
+      {/* Footer */}
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        className="mt-8 text-center text-sm text-gray-500 relative z-10"
+      >
+        Restaurant Okla © {new Date().getFullYear()}
+      </motion.p>
     </div>
   );
 }

@@ -1,164 +1,283 @@
-import React, { useEffect, useState } from 'react'
-import Loadingscreen from './Loadingscreen';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
+import React from "react";
+import { motion } from "framer-motion";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import { Card, CardContent, GlassCard } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Input, Textarea, Label } from "../components/ui/input";
+import { Badge } from "../components/ui/badge";
+import {
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  Send,
+  Facebook,
+  Instagram,
+  MessageCircle,
+} from "lucide-react";
+import { useDocumentTitle } from "../hooks";
+
+const contactInfo = [
+  {
+    icon: MapPin,
+    title: "Adresse",
+    content: "70 avenue Bégin, Lévis G6V5C4",
+    href: "https://maps.google.com/?q=70+Av.+Bégin,+Lévis,+QC",
+    color: "from-green-500 to-emerald-500",
+  },
+  {
+    icon: Phone,
+    title: "Téléphone",
+    content: "+1 581 882 7878",
+    href: "tel:+15818827878",
+    color: "from-blue-500 to-cyan-500",
+  },
+  {
+    icon: Mail,
+    title: "Email",
+    content: "restokla2024@gmail.com",
+    href: "mailto:restokla2024@gmail.com",
+    color: "from-purple-500 to-pink-500",
+  },
+  {
+    icon: Clock,
+    title: "Horaires",
+    content: "Lun - Dim: 11h30 - 19h",
+    href: null,
+    color: "from-amber-500 to-orange-500",
+  },
+];
+
+const socialLinks = [
+  { icon: Facebook, href: "https://facebook.com", label: "Facebook" },
+  { icon: Instagram, href: "https://instagram.com", label: "Instagram" },
+  { icon: MessageCircle, href: "https://wa.me/15818827878", label: "WhatsApp" },
+];
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+};
 
 export default function Contact() {
-    const [isLoading,setIsLoading] = useState(true)
-    document.title = 'Restaurant Okla | Contact';
-    useEffect(() => {
-        // Simulate an API call
-        
-        setIsLoading(false);
-        
-      }, []);
-      if (isLoading) {
-        return <Loadingscreen />;
-    }
-    
+  useDocumentTitle("Contact");
+
   return (
-    <div className='bg-green-50'>
-      <Navbar/>
-      <div className='max-w-7xl mx-auto my-10 md:my-20'>
-          <div>
-            <section className="text-gray-700 body-font relative">
-              <div className="container px-5 md:py-24 mx-auto">
-                <div className="flex flex-col text-center w-full mb-12">
-                  <h1 className="sm:text-3xl text-2xl font-medium title-font mb-4 text-gray-900">
-                    Contactez-Nous
-                  </h1>
-                  <p className="lg:w-2/3 mx-auto leading-relaxed text-base">
-                    Veuillez remplir ce formulaire pour nous contacter.
+    <div className="bg-gradient-to-b from-green-50 via-white to-green-50 min-h-screen">
+      <Navbar />
+
+      <main className="py-12 md:py-20">
+        <div className="max-w-7xl mx-auto px-4">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-16"
+          >
+            <Badge variant="secondary" className="mb-4">
+              Nous sommes à votre écoute
+            </Badge>
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Contactez-<span className="text-gradient">Nous</span>
+            </h1>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Une question, une réservation ou simplement envie de nous dire
+              bonjour? N'hésitez pas à nous contacter!
+            </p>
+          </motion.div>
+
+          <div className="grid lg:grid-cols-2 gap-12">
+            {/* Contact Form */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Card className="border-0 shadow-soft-lg overflow-hidden">
+                <div className="bg-gradient-to-r from-green-600 to-green-700 p-6">
+                  <h2 className="text-xl font-semibold text-white">
+                    Envoyez-nous un message
+                  </h2>
+                  <p className="text-green-100 text-sm mt-1">
+                    Nous vous répondrons dans les plus brefs délais
                   </p>
                 </div>
-                <div className="lg:w-1/2 md:w-2/3 mx-auto">
-                <form action="https://formsubmit.co/restokla2024@gmail.com" method="POST">
-                  <div className="flex flex-wrap -m-2">
-                    <div className="p-2 w-1/2">
-                      <div className="relative">
-                        <label for="name" className="leading-7 text-sm text-gray-600">
-                          Nom
-                        </label>
-                        <input
+                <CardContent className="p-6">
+                  <form
+                    action="https://formsubmit.co/restokla2024@gmail.com"
+                    method="POST"
+                    className="space-y-6"
+                  >
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="name">Nom</Label>
+                        <Input
                           type="text"
                           id="name"
                           name="name"
-                          className="w-full bg-gray-100 rounded border border-gray-300 focus:border-green-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                          placeholder="Votre nom"
+                          required
                         />
                       </div>
-                    </div>
-                    <div className="p-2 w-1/2">
-                      <div className="relative">
-                        <label
-                          for="email"
-                          className="leading-7 text-sm text-gray-600"
-                        >
-                          Email
-                        </label>
-                        <input
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <Input
                           type="email"
                           id="email"
                           name="email"
-                          className="w-full bg-gray-100 rounded border border-gray-300 focus:border-green-500 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out"
+                          placeholder="votre@email.com"
+                          required
                         />
                       </div>
                     </div>
-                    <div className="p-2 w-full">
-                      <div className="relative">
-                        <label
-                          for="message"
-                          className="leading-7 text-sm text-gray-600"
-                        >
-                          Message
-                        </label>
-                        <textarea
-                          id="message"
-                          name="message"
-                          className="w-full bg-gray-100 rounded border border-gray-300 focus:border-green-500 h-32 text-base outline-none text-gray-700 py-1 px-3 resize-none leading-6 transition-colors duration-200 ease-in-out"
-                        ></textarea>
-                      </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="subject">Sujet</Label>
+                      <Input
+                        type="text"
+                        id="subject"
+                        name="subject"
+                        placeholder="Sujet de votre message"
+                      />
                     </div>
-                    <div className="p-2 w-full">
-                      <button className="flex mx-auto text-white bg-green-500 border-0 py-2 px-8 focus:outline-none hover:bg-green-600 rounded text-lg">
-                        Envoyer
-                      </button>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="message">Message</Label>
+                      <Textarea
+                        id="message"
+                        name="message"
+                        placeholder="Votre message..."
+                        className="min-h-[150px]"
+                        required
+                      />
                     </div>
-                    <div className="p-2 w-full pt-8 mt-8 border-t border-gray-200 text-center">
-                      <a className="text-green-500" href='mailto:restokla2024@gmail.com'>restokla2024@gmail.com</a>
-                      <p className="leading-normal my-5">
-                        70 avenue Bégin Lévis G6V5C4
-                        <br />
-                        <a href="tel:+15818827878">+1 581 882 7878</a>
-                      </p>
-                      <span className="inline-flex">
-                        <a className="text-gray-500">
-                          <svg
-                            fill="currentColor"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            className="w-5 h-5"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"></path>
-                          </svg>
-                        </a>
-                        <a className="ml-4 text-gray-500">
-                          <svg
-                            fill="currentColor"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            className="w-5 h-5"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"></path>
-                          </svg>
-                        </a>
-                        <a className="ml-4 text-gray-500">
-                          <svg
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            className="w-5 h-5"
-                            viewBox="0 0 24 24"
-                          >
-                            <rect
-                              width="20"
-                              height="20"
-                              x="2"
-                              y="2"
-                              rx="5"
-                              ry="5"
-                            ></rect>
-                            <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zm1.5-4.87h.01"></path>
-                          </svg>
-                        </a>
-                        <a className="ml-4 text-gray-500">
-                          <svg
-                            fill="currentColor"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            className="w-5 h-5"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"></path>
-                          </svg>
-                        </a>
-                      </span>
-                    </div>
-                  </div>
+
+                    <Button
+                      type="submit"
+                      size="lg"
+                      variant="gradient"
+                      className="w-full gap-2"
+                    >
+                      <Send className="w-5 h-5" />
+                      Envoyer le message
+                    </Button>
                   </form>
-                </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Contact Info */}
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="space-y-6"
+            >
+              {/* Info Cards */}
+              <div className="grid sm:grid-cols-2 gap-4">
+                {contactInfo.map((info, index) => (
+                  <motion.div key={index} variants={itemVariants}>
+                    <Card className="h-full border-0 shadow-soft hover-lift">
+                      <CardContent className="p-5">
+                        <div className="flex items-start gap-4">
+                          <div
+                            className={`p-3 rounded-xl bg-gradient-to-br ${info.color} flex-shrink-0`}
+                          >
+                            <info.icon className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-gray-900 mb-1">
+                              {info.title}
+                            </h3>
+                            {info.href ? (
+                              <a
+                                href={info.href}
+                                target={
+                                  info.href.startsWith("http")
+                                    ? "_blank"
+                                    : undefined
+                                }
+                                rel={
+                                  info.href.startsWith("http")
+                                    ? "noopener noreferrer"
+                                    : undefined
+                                }
+                                className="text-gray-600 hover:text-green-600 transition-colors text-sm"
+                              >
+                                {info.content}
+                              </a>
+                            ) : (
+                              <p className="text-gray-600 text-sm">
+                                {info.content}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
               </div>
-            </section>
+
+              {/* Social Links */}
+              <motion.div variants={itemVariants}>
+                <Card className="border-0 shadow-soft">
+                  <CardContent className="p-6">
+                    <h3 className="font-semibold text-gray-900 mb-4">
+                      Suivez-nous sur les réseaux
+                    </h3>
+                    <div className="flex gap-3">
+                      {socialLinks.map((social) => (
+                        <motion.a
+                          key={social.label}
+                          href={social.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          whileHover={{ scale: 1.1, y: -2 }}
+                          whileTap={{ scale: 0.95 }}
+                          className="p-3 bg-gray-100 rounded-xl hover:bg-green-100 hover:text-green-600 transition-colors"
+                          aria-label={social.label}
+                        >
+                          <social.icon className="w-6 h-6" />
+                        </motion.a>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {/* Map Preview */}
+              <motion.div variants={itemVariants}>
+                <GlassCard className="overflow-hidden">
+                  <div className="aspect-video relative">
+                    <iframe
+                      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2730.787602556296!2d-71.18331668759187!3d46.808489642628196!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4cb895bc3065b769%3A0xe318d05e8b004093!2s70%20Av.%20B%C3%A9gin%2C%20L%C3%A9vis%2C%20QC%20G6V%204C5%2C%20Canada!5e0!3m2!1sen!2stn!4v1719059603528!5m2!1sen!2stn"
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0, position: "absolute", inset: 0 }}
+                      allowFullScreen=""
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title="Restaurant Okla Location"
+                    />
+                  </div>
+                </GlassCard>
+              </motion.div>
+            </motion.div>
           </div>
-      </div>
-      <Footer/>
+        </div>
+      </main>
+
+      <Footer />
     </div>
-    
-  )
+  );
 }

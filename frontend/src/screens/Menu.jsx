@@ -1,99 +1,143 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import MobileMenuScroller from "../components/MobileScroller";
-import Loadingscreen, { ProductGridSkeleton } from "./Loadingscreen";
+import { ProductGridSkeleton } from "./Loadingscreen";
 import { useProducts, useDocumentTitle } from "../hooks";
+import { Card, CardContent } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import { ScrollArea, ScrollBar } from "../components/ui/scroll-area";
+import { cn } from "../lib/utils";
+import { ChevronDown, ChevronUp, Sparkles, RefreshCw } from "lucide-react";
+
+const menuCategories = [
+  { id: "burgers", label: "BURGER OKLA", icon: "🍔" },
+  { id: "pizzas", label: "MINI PIZZA", icon: "🍕" },
+  { id: "poutines", label: "POUTINE OKLA", icon: "🍟" },
+  { id: "sandwichs", label: "SANDWICH OKLA", icon: "🥖" },
+  { id: "assiettes", label: "LES ASSIETTES", icon: "🍽️" },
+  { id: "barquettes", label: "BARQUETTES", icon: "📦" },
+];
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { duration: 0.4 },
+  },
+};
 
 const MenuItem = ({ item, index }) => (
-  <div
-    key={index}
-    className="rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105 justify-items-center flex-col gap-2 md:gap-4 bg-white"
-  >
-    <div className="relative h-60 w-full object-contain">
-      {item.promo && (
-        <img
-          src="https://static.vecteezy.com/system/resources/previews/010/176/890/non_2x/promo-element-marketing-strategy-label-with-red-color-background-free-png.png"
-          alt="promo"
-          className="absolute z-10 w-24 md:w-48"
-        />
-      )}
-      <LazyLoadImage
-        src={item.bannerImg}
-        alt={item.title}
-        effect="blur"
-        wrapperProps={{
-          style: { transitionDelay: "0.25s" },
-        }}
-        className="rounded-lg object-cover h-[240px] w-full md:h-60"
-        placeholderSrc={item.bannerImg}
-        loading="lazy"
-      />
-    </div>
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-2">
-        <h3 className="text-xl font-semibold text-gray-800">{item.title}</h3>
-        {item.price && (
-          <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-semibold">
-            {item.price}
-          </span>
+  <motion.div variants={itemVariants} whileHover={{ y: -8 }} className="group">
+    <Card className="h-full overflow-hidden border-0 shadow-soft hover:shadow-soft-lg transition-all duration-300">
+      <div className="relative overflow-hidden">
+        {item.promo && (
+          <motion.div
+            initial={{ x: -100 }}
+            animate={{ x: 0 }}
+            className="absolute top-3 left-3 z-10"
+          >
+            <Badge variant="destructive" className="gap-1 shadow-lg">
+              <Sparkles className="w-3 h-3" />
+              PROMO
+            </Badge>
+          </motion.div>
         )}
+        <div className="relative h-56 overflow-hidden">
+          <LazyLoadImage
+            src={item.bannerImg}
+            alt={item.title}
+            effect="blur"
+            wrapperProps={{
+              style: { transitionDelay: "0.1s" },
+            }}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            placeholderSrc={item.bannerImg}
+            loading="lazy"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </div>
       </div>
-      <p className="text-gray-600 text-sm">{item.description}</p>
-    </div>
-  </div>
+      <CardContent className="p-5">
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="text-lg font-semibold text-gray-900 group-hover:text-green-600 transition-colors line-clamp-1">
+            {item.title}
+          </h3>
+          {item.price && (
+            <Badge variant="success" className="ml-2 flex-shrink-0">
+              {item.price}
+            </Badge>
+          )}
+        </div>
+        <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed">
+          {item.description}
+        </p>
+      </CardContent>
+    </Card>
+  </motion.div>
 );
 
-const MenuCategory = ({ items }) => {
+const MenuCategory = ({ items, categoryName }) => {
   const [showAll, setShowAll] = useState(false);
-  const displayedItems = showAll ? items : items.slice(0, 3);
-  const contentRef = useRef(null);
-  const [contentHeight, setContentHeight] = useState("auto");
-
-  useEffect(() => {
-    if (contentRef.current) {
-      const calculateHeight = () => {
-        const fullHeight = contentRef.current.scrollHeight;
-        const singleItemHeight =
-          contentRef.current.children[0]?.offsetHeight || 0;
-        const collapsedHeight = Math.min(fullHeight, singleItemHeight * 3 + 64);
-        return showAll ? `${fullHeight}px` : `${collapsedHeight}px`;
-      };
-
-      setContentHeight(calculateHeight());
-
-      if (!showAll) {
-        setTimeout(() => {
-          setContentHeight(calculateHeight());
-        }, 0);
-      }
-    }
-  }, [showAll, items]);
+  const displayedItems = showAll ? items : items.slice(0, 6);
 
   if (items.length === 0) return null;
 
   return (
-    <div className="mb-12">
-      <div
-        ref={contentRef}
-        className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 transition-[max-height] duration-500 ease-in-out"
-        style={{ maxHeight: contentHeight }}
+    <div className="mb-16">
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-50px" }}
+        className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6"
       >
-        {displayedItems.map((item, index) => (
-          <MenuItem key={item._id || index} item={item} index={index} />
-        ))}
-      </div>
-      {items.length > 3 && (
-        <div className="text-center mt-8">
-          <button
+        <AnimatePresence mode="wait">
+          {displayedItems.map((item, index) => (
+            <MenuItem key={item._id || index} item={item} index={index} />
+          ))}
+        </AnimatePresence>
+      </motion.div>
+
+      {items.length > 6 && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center mt-8"
+        >
+          <Button
             onClick={() => setShowAll(!showAll)}
-            className="bg-green-600 hover:bg-green-700 text-white transition-colors duration-300 p-4 rounded-lg"
+            variant="outline"
+            size="lg"
+            className="gap-2"
           >
-            {showAll ? "Voir moins" : "Voir plus"}
-          </button>
-        </div>
+            {showAll ? (
+              <>
+                <ChevronUp className="w-5 h-5" />
+                Voir moins
+              </>
+            ) : (
+              <>
+                <ChevronDown className="w-5 h-5" />
+                Voir plus ({items.length - 6} de plus)
+              </>
+            )}
+          </Button>
+        </motion.div>
       )}
     </div>
   );
@@ -101,6 +145,7 @@ const MenuCategory = ({ items }) => {
 
 export default function Menu() {
   useDocumentTitle("Menu");
+  const [activeCategory, setActiveCategory] = useState("burgers");
 
   const {
     isLoading,
@@ -116,11 +161,28 @@ export default function Menu() {
     patisseries,
     fetchProducts,
   } = useProducts();
+
+  const categoryData = {
+    burgers,
+    pizzas,
+    poutines,
+    sandwichs,
+    assiettes,
+    barquettes,
+    cafes,
+    cremeries,
+    patisseries,
+  };
+
   if (isLoading) {
     return (
-      <div className="bg-green-50 min-h-screen">
+      <div className="bg-gradient-to-b from-green-50 to-white min-h-screen">
         <Navbar />
-        <div className="max-w-7xl mx-auto my-8 md:my-20 px-4">
+        <div className="max-w-7xl mx-auto py-12 px-4">
+          <div className="text-center mb-12">
+            <div className="h-8 w-48 bg-gray-200 rounded-lg mx-auto mb-4 animate-pulse" />
+            <div className="h-4 w-64 bg-gray-200 rounded mx-auto animate-pulse" />
+          </div>
           <ProductGridSkeleton count={6} />
         </div>
         <Footer />
@@ -130,16 +192,24 @@ export default function Menu() {
 
   if (error) {
     return (
-      <div className="bg-green-50 min-h-screen">
+      <div className="bg-gradient-to-b from-green-50 to-white min-h-screen">
         <Navbar />
-        <div className="max-w-7xl mx-auto my-8 md:my-20 px-4 text-center">
-          <p className="text-red-600 mb-4">{error}</p>
-          <button
-            onClick={fetchProducts}
-            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-          >
-            Réessayer
-          </button>
+        <div className="max-w-7xl mx-auto py-20 px-4">
+          <Card className="max-w-md mx-auto text-center p-8">
+            <CardContent className="space-y-4">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+                <RefreshCw className="w-8 h-8 text-red-500" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900">
+                Erreur de chargement
+              </h3>
+              <p className="text-gray-600">{error}</p>
+              <Button onClick={fetchProducts} className="gap-2">
+                <RefreshCw className="w-4 h-4" />
+                Réessayer
+              </Button>
+            </CardContent>
+          </Card>
         </div>
         <Footer />
       </div>
@@ -147,128 +217,163 @@ export default function Menu() {
   }
 
   return (
-    <div className="bg-green-50">
+    <div className="bg-gradient-to-b from-green-50 via-white to-green-50 min-h-screen">
       <Navbar />
-      <div className="md:max-w-7xl mx-auto my-8 md:my-20 flex flex-col gap-8 md:gap-20 ">
-        <div className="hidden w-full md:grid mx-auto  grid-cols-6 bg-green-600 border-green-600 border-2 text-center">
-          <div>
-            <a href="#burgers">
-              <button className="text-white text-lg font-medium hover:bg-white hover:text-green-600 py-20 w-full h-full">
-                BURGER OKLA
-              </button>
-            </a>
-          </div>
-          <div>
-            <a href="#pizzas">
-              <button className="text-white text-lg font-medium hover:bg-white hover:text-green-600 py-20 w-full h-full">
-                MINI PIZZA 6PO
-              </button>
-            </a>
-          </div>
-          <div>
-            <a href="#poutines">
-              <button className="text-white text-lg font-medium hover:bg-white hover:text-green-600 py-20 w-full h-full">
-                POUTINE OKLA
-              </button>
-            </a>
-          </div>
-          <div>
-            <a href="#sandwichs">
-              <button className="text-white text-lg font-medium hover:bg-white hover:text-green-600 py-20 w-full h-full">
-                SANDWICH OKLA
-              </button>
-            </a>
-          </div>
-          <div>
-            <a href="#assiettes">
-              <button className="text-white text-lg font-medium hover:bg-white hover:text-green-600 py-20 w-full h-full">
-                LES ASSIETTES
-              </button>
-            </a>
-          </div>
-          <div>
-            <a href="#barquettes">
-              <button className="text-white text-lg font-medium hover:bg-white hover:text-green-600 py-20 w-full h-full">
-                BARQUETTES PATATES
-              </button>
-            </a>
-          </div>
+
+      <main className="py-8 md:py-16">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-12 px-4"
+        >
+          <Badge variant="secondary" className="mb-4">
+            Découvrez nos spécialités
+          </Badge>
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            Notre <span className="text-gradient">Menu</span>
+          </h1>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Des saveurs authentiques tunisiennes et méditerranéennes préparées
+            avec des ingrédients frais et de qualité.
+          </p>
+        </motion.div>
+
+        {/* Desktop Category Navigation */}
+        <div className="hidden md:block max-w-6xl mx-auto mb-12 px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Card className="p-2 border-0 shadow-soft">
+              <ScrollArea className="w-full">
+                <div className="flex gap-2 p-1">
+                  {menuCategories.map((cat) => (
+                    <a
+                      key={cat.id}
+                      href={`#${cat.id}`}
+                      onClick={() => setActiveCategory(cat.id)}
+                      className={cn(
+                        "flex-1 min-w-[140px] py-4 px-6 rounded-xl text-center font-medium transition-all duration-300",
+                        activeCategory === cat.id
+                          ? "bg-green-600 text-white shadow-md"
+                          : "bg-gray-50 text-gray-700 hover:bg-green-50 hover:text-green-600",
+                      )}
+                    >
+                      <span className="text-2xl block mb-1">{cat.icon}</span>
+                      <span className="text-xs">{cat.label}</span>
+                    </a>
+                  ))}
+                </div>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            </Card>
+          </motion.div>
         </div>
 
+        {/* Mobile Menu Scroller */}
         <MobileMenuScroller />
 
-        <div className="flex flex-col gap-20  py-10 px-2 md:max-w-7xl mx-auto md:p-0 ">
-          <section className="flex flex-col gap-8" id="burgers">
-            <h1 className="text-3xl md:text-5xl font-bold title-font mb-4 text-gray-900 md:hidden">
-              Burgers
-            </h1>
-            {/* Burgers */}
-            <MenuCategory items={burgers} />
-          </section>
-          <section className="flex flex-col gap-8" id="pizzas">
-            <h1 className="text-3xl md:text-5xl font-bold title-font mb-4 text-gray-900 md:hidden">
-              Pizzas
-            </h1>
-            {/* Pizzas */}
-            <MenuCategory items={pizzas} />
-          </section>
-          <section className="flex flex-col gap-8" id="poutines">
-            <h1 className="text-3xl md:text-5xl font-bold title-font mb-4 text-gray-900 md:hidden">
-              Poutines
-            </h1>
-            {/* Poutines */}
-            <MenuCategory items={poutines} />
-          </section>
-          <section className="flex flex-col gap-8" id="sandwichs">
-            <h1 className="text-3xl md:text-5xl font-bold title-font mb-4 text-gray-900 md:hidden">
-              Sandwichs
-            </h1>
-            {/* Sandwichs */}
-            <MenuCategory items={sandwichs} />
-          </section>
-          <section className="flex flex-col gap-8" id="assiettes">
-            <h1 className="text-3xl md:text-5xl font-bold title-font mb-4 text-gray-900 md:hidden">
-              Assiettes
-            </h1>
-            {/* Assiettes */}
-            <MenuCategory items={assiettes} />
-          </section>
-          <section className="flex flex-col gap-8" id="barquettes">
-            <h1 className="text-3xl md:text-5xl font-bold title-font mb-4 text-gray-900 md:hidden">
-              Barquettes
-            </h1>
-            {/* Barquettes */}
-            <MenuCategory items={barquettes} />
-          </section>
-          {cafes.length !== 0 && (
-            <section className="flex flex-col gap-8" id="cafes">
-              <h1 className="text-3xl md:text-5xl font-bold title-font mb-4 text-gray-900 md:hidden">
-                café
-              </h1>
-              {/* Cafe */}
-              <MenuCategory items={cafes} />
+        {/* Menu Sections */}
+        <div className="max-w-7xl mx-auto px-4 space-y-16">
+          {menuCategories.map((cat) => {
+            const items = categoryData[cat.id] || [];
+            if (items.length === 0) return null;
+
+            return (
+              <section key={cat.id} id={cat.id} className="scroll-mt-24">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  className="flex items-center gap-4 mb-8"
+                >
+                  <span className="text-4xl">{cat.icon}</span>
+                  <div>
+                    <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+                      {cat.label}
+                    </h2>
+                    <p className="text-gray-500 text-sm">
+                      {items.length} produit{items.length > 1 ? "s" : ""}
+                    </p>
+                  </div>
+                </motion.div>
+                <MenuCategory items={items} categoryName={cat.label} />
+              </section>
+            );
+          })}
+
+          {/* Optional Categories */}
+          {cafes.length > 0 && (
+            <section id="cafes" className="scroll-mt-24">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="flex items-center gap-4 mb-8"
+              >
+                <span className="text-4xl">☕</span>
+                <div>
+                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+                    CAFÉ
+                  </h2>
+                  <p className="text-gray-500 text-sm">
+                    {cafes.length} produit{cafes.length > 1 ? "s" : ""}
+                  </p>
+                </div>
+              </motion.div>
+              <MenuCategory items={cafes} categoryName="Café" />
             </section>
           )}
-          {cremeries.length !== 0 && (
-            <section className="flex flex-col gap-8" id="cremeries">
-              <h1 className="text-3xl md:text-5xl font-bold title-font mb-4 text-gray-900 md:hidden">
-                Crémerie
-              </h1>
-              {/* Crémerie */}
-              <MenuCategory items={cremeries} />
+
+          {cremeries.length > 0 && (
+            <section id="cremeries" className="scroll-mt-24">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="flex items-center gap-4 mb-8"
+              >
+                <span className="text-4xl">🍦</span>
+                <div>
+                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+                    CRÉMERIE
+                  </h2>
+                  <p className="text-gray-500 text-sm">
+                    {cremeries.length} produit{cremeries.length > 1 ? "s" : ""}
+                  </p>
+                </div>
+              </motion.div>
+              <MenuCategory items={cremeries} categoryName="Crémerie" />
             </section>
           )}
-          {patisseries.length !== 0 && (
-            <section className="flex flex-col gap-8" id="patisseries">
-              <h1 className="text-3xl md:text-5xl font-bold title-font mb-4 text-gray-900 md:hidden">
-                Pâtisserie
-              </h1>
-              {/* Pâtisserie */}
-              <MenuCategory items={patisseries} />
+
+          {patisseries.length > 0 && (
+            <section id="patisseries" className="scroll-mt-24">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                className="flex items-center gap-4 mb-8"
+              >
+                <span className="text-4xl">🥐</span>
+                <div>
+                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+                    PÂTISSERIE
+                  </h2>
+                  <p className="text-gray-500 text-sm">
+                    {patisseries.length} produit
+                    {patisseries.length > 1 ? "s" : ""}
+                  </p>
+                </div>
+              </motion.div>
+              <MenuCategory items={patisseries} categoryName="Pâtisserie" />
             </section>
           )}
         </div>
-      </div>
+      </main>
+
       <Footer />
     </div>
   );
