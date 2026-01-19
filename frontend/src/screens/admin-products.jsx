@@ -1,177 +1,239 @@
-import React, { useEffect, useState } from 'react'
-import Axios from 'axios';
-import Loadingscreen from './Loadingscreen';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  ArrowLeft,
+  Plus,
+  Edit,
+  Trash2,
+  Package,
+  CheckCircle,
+} from "lucide-react";
+import Loadingscreen, { ProductGridSkeleton } from "./Loadingscreen";
+import { useProducts, useDocumentTitle } from "../hooks";
+import { useToast } from "../components/Toast";
+import { useConfirm } from "../components/ConfirmDialog";
+import { PRODUCT_TYPES } from "../config/constants";
 
+// Product Card Component
+const ProductCard = ({ product, onEdit, onDelete }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+    >
+      <div className="relative h-48">
+        {product.promo && (
+          <div className="absolute top-2 left-2 z-10 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
+            PROMO
+          </div>
+        )}
+        <img
+          src={product.bannerImg}
+          alt={product.title}
+          className="w-full h-full object-cover"
+          loading="lazy"
+        />
+      </div>
+      <div className="p-4">
+        <h3 className="font-semibold text-gray-900 truncate">
+          {product.title}
+        </h3>
+        <div className="flex items-center gap-2 mt-1">
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+            <CheckCircle className="w-3 h-3 mr-1" />
+            {product.type}
+          </span>
+        </div>
+        <p className="text-sm text-gray-500 mt-2 line-clamp-2">
+          {product.description}
+        </p>
 
+        <div className="flex gap-2 mt-4">
+          <button
+            onClick={() => onEdit(product._id)}
+            className="flex-1 flex items-center justify-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+          >
+            <Edit className="w-4 h-4" />
+            Modifier
+          </button>
+          <button
+            onClick={() => onDelete(product._id)}
+            className="flex items-center justify-center px-3 py-2 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600 transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
 
+// Section Component for grouping products
+const ProductSection = ({ title, products, onEdit, onDelete }) => {
+  if (products.length === 0) return null;
+
+  return (
+    <div className="mb-10">
+      <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+        <Package className="w-5 h-5 text-green-600" />
+        {title}
+        <span className="text-sm font-normal text-gray-500">
+          ({products.length})
+        </span>
+      </h2>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {products.map((product) => (
+          <ProductCard
+            key={product._id}
+            product={product}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
 
 export default function AdminProducts() {
-    const [isLoading,setIsLoading] = useState(true)
-    const [products,setProducts] = useState([])
-    const token = localStorage.getItem("accessToken")
+  const navigate = useNavigate();
+  const toast = useToast();
+  const confirm = useConfirm();
+  const {
+    products,
+    productsByType,
+    isLoading,
+    error,
+    deleteProduct,
+    fetchProducts,
+  } = useProducts();
 
-    const [pizzas,setPizzas] = useState([])
-    const [burgers,setBurgers] = useState([])
-    const [poutines,setPoutines] = useState([])
-    const [sandwichs,setSandwichs] = useState([])
-    const [assiettes,setAssiettes] = useState([])
-    const [barquettes,setBarquettes] = useState([])
-    const [cafes,setCafe] = useState([])
-    const [cremeries,setCremerie] = useState([])
-    const [patisseries,setPatisserie] = useState([])
-    const navigate = useNavigate();
-    useEffect(() => {
-        // Simulate an API call
-        const loginUser = async()=>{
-            try {
-              const { data } = await Axios.post(`${process.env.REACT_APP_DOMAIN}/api/admin/checkuser`,{
-                token:token
-              });
-              
-            }catch (err) {
-              console.log("error", err)
-              navigate('/login');
-            }
-        }
-        loginUser();
+  useDocumentTitle("Gestion des Produits");
 
-        const fetchData = async () => {
-          try {
-           const { data } = await Axios.get(`${process.env.REACT_APP_DOMAIN}/api/product`);
-           setProducts(data.products)
-           setPizzas(data.products.filter((product)=>product.type==="pizza"))
-           setBurgers(data.products.filter((product)=>product.type==="burger"))
-           setPoutines(data.products.filter((product)=>product.type==="poutine"))
-           setSandwichs(data.products.filter((product)=>product.type==="sandwich"))
-           setAssiettes(data.products.filter((product)=>product.type==="assiette"))
-           setBarquettes(data.products.filter((product)=>product.type==="barquette"))
-           setCafe(data.products.filter((product)=>product.type==="cafe"))
-           setCremerie(data.products.filter((product)=>product.type==="cremerie"))
-           setPatisserie(data.products.filter((product)=>product.type==="patisserie"))
-           setIsLoading(false);
-           
-          }catch (err) {
-            console.log("error", err)
-          }
-        };
-        fetchData();
-        
-        
-      }, []);
-      if (isLoading) {
-        return <Loadingscreen />;
-    }
-    
-    const editUser = async(e)=>{
-        e.preventDefault();
-        const id = e.target.id;
-        navigate(`/admin/modifier-product/${id}`)
-    }
+  const handleEdit = (id) => {
+    navigate(`/admin/produit/${id}`);
+  };
 
-    const deleteUser = async(e)=>{
-        e.preventDefault();
-        const id = e.target.id;
-        try {
-            const { data } = await Axios.delete(`${process.env.REACT_APP_DOMAIN}/api/product/${id}?token=${token}`)
-            console.log(data)
-            alert(data.message)
-            window.location.reload()
-        }catch(err){
-            console.log(err)
-        }
+  const handleDelete = async (id) => {
+    const confirmed = await confirm({
+      title: "Supprimer le produit",
+      message:
+        "Êtes-vous sûr de vouloir supprimer ce produit? Cette action est irréversible.",
+      confirmText: "Supprimer",
+      cancelText: "Annuler",
+      variant: "danger",
+    });
+
+    if (confirmed) {
+      const result = await deleteProduct(id);
+      if (result.success) {
+        toast.success("Succès", "Produit supprimé avec succès");
+      } else {
+        toast.error(
+          "Erreur",
+          result.error || "Impossible de supprimer le produit",
+        );
+      }
     }
-    const MenuCategory = ({category})=>{
-        return(
-            <li class="mb-4">
-                        <div class="flex items-center py-5 px-4 sm:py-6 sm:px-0 shadow-md border hover:shadow-lg">
-                            <div class="flex min-w-0 flex-1 items-center px-4 flex-col justify-center md:flex-row gap-4 md:gap-0">
-                                <div class="flex-shrink-0 w-full md:w-auto"><img class="h-3/4 w-full md:h-12 md:w-24 rounded group-hover:opacity-75" 
-                                    src={category.bannerImg} alt="produit"/>
-                                </div>
-                                <div class="min-w-0 flex-1 px-4 flex flex-col md:grid md:grid-cols-4 md:items-center gap-2 md:gap-4">
-                                    <div>
-                                    <p class="md:truncate text-sm font-medium text-purple-600">{category.title}</p>
-                                    <p class="mt-2 flex items-center text-sm text-gray-500">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" class="mr-1.5 h-5 w-5 flex-shrink-0 text-green-400"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"></path></svg>
-                                        <h2 className='font-bold'>TYPE : </h2>
-                                        <span class="md:truncate">{category.type}</span></p>
-                                    </div>
-                                    <div class=" md:block col-span-1 col-start-4">
-                                        <div className='flex gap-2'>
-                                            <button type="button" 
-                                                id={category._id}
-                                                onClick={editUser}
-                                                class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                                
-                                                Modifier
-                                            </button>
-                                            <button type="button" 
-                                                id={category._id}
-                                                onClick={deleteUser}
-                                                class="inline-flex items-center rounded-md border border-gray-300 bg-red-600 text-white px-3 py-2 text-sm font-medium leading-4 shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                                Supprimer
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-        )
-    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-8">
+        <div className="max-w-7xl mx-auto">
+          <ProductGridSkeleton count={8} />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <button
+            onClick={fetchProducts}
+            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+          >
+            Réessayer
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div>
-        <section class="mx-auto max-w-7xl sm:px-6 lg:px-8 mt-12">
-            <div class="px-4 sm:px-0 mb-4 flex justify-between items-center">
-                <h2 class="text-sm md:text-xl font-medium text-gray-900" id="produits">Produits<span id='count'></span> </h2>
-
-                <a>
-                    <button
-                    id="ajouter-blog"
-                    type="button"
-                    onClick={()=>navigate("/admin/ajouter-produit")}
-                    class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >
-                        Ajouter nouveau produit
-                    </button>
-                </a>
-
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => navigate("/admin")}
+                className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">
+                  Gestion des Produits
+                </h1>
+                <p className="text-sm text-gray-500">
+                  {products.length} produits au total
+                </p>
+              </div>
             </div>
-            <ul
-                class="mt-5 px-4 divide-y divide-gray-200 border-gray-200 sm:mt-0 sm:border-t-0"
-                id="list"
+            <button
+              onClick={() => navigate("/admin/produit/nouveau")}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
             >
-                {burgers.map((burger)=>(
-                    <MenuCategory category={burger}/>
-                ))}
-                {pizzas.map((pizza)=>(
-                    <MenuCategory category={pizza}/>
-                ))}
-                {poutines.map((poutine)=>(
-                    <MenuCategory category={poutine}/>
-                ))}
-                {sandwichs.map((sandwich)=>(
-                    <MenuCategory category={sandwich}/>
-                ))}
-                {assiettes.map((assiette)=>(
-                    <MenuCategory category={assiette}/>
-                ))}
-                {barquettes.map((barquette)=>(
-                    <MenuCategory category={barquette}/>
-                ))}
-                {cafes.map((cafe)=>(
-                    <MenuCategory category={cafe}/>
-                ))}
-                {cremeries.map((cremerie)=>(
-                    <MenuCategory category={cremerie}/>
-                ))}
-                {patisseries.map((patisserie)=>(
-                    <MenuCategory category={patisserie}/>
-                ))}
-                
-            </ul>
-        </section>
+              <Plus className="w-4 h-4" />
+              Nouveau produit
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {products.length === 0 ? (
+          <div className="text-center py-20">
+            <Package className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              Aucun produit
+            </h2>
+            <p className="text-gray-500 mb-6">
+              Commencez par ajouter votre premier produit
+            </p>
+            <button
+              onClick={() => navigate("/admin/ajouter-produit")}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+              Ajouter un produit
+            </button>
+          </div>
+        ) : (
+          <>
+            {PRODUCT_TYPES.map(({ value, label }) => (
+              <ProductSection
+                key={value}
+                title={label}
+                products={
+                  productsByType[value + "s"] || productsByType[value] || []
+                }
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
+            ))}
+          </>
+        )}
+      </main>
     </div>
-  )
+  );
 }

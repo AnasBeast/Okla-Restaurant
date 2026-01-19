@@ -1,146 +1,169 @@
 const Blog = require("../models/blog");
+const { asyncHandler } = require("../middleware/errorHandler");
+const {
+  SUCCESS_MESSAGES,
+  ERROR_MESSAGES,
+  PAGINATION,
+} = require("../config/constants");
 
-exports.getBlogs = async(req,res,next) =>{
-    const pageSize = +req.query.pagesize;
-    const currPage = +req.query.page;
-    const blogQuery = Blog.find();
-    let fetchBlog;
-    if (pageSize && currPage){
-        blogQuery.skip(pageSize * (currPage -1 )).limit(pageSize);
-    }
-    await blogQuery
-        .then((doc)=>{
-            fetchBlog = doc;
-            return Blog.countDocuments();
-        })
-        .then((count)=>{
-            res.status(200).json({
-                message: "All Blogs fetched 200!",
-                blogs: fetchBlog,
-                maxBlogs: count,
-            });
-        })
-        .catch((err)=>{
-            res.status(500).json({
-                message: "Fetching Blogs failed!"
-            });
-        });
-};
+/**
+ * Get all blogs with pagination
+ * GET /api/blogs
+ */
+exports.getBlogs = asyncHandler(async (req, res, next) => {
+  const pageSize = parseInt(req.query.pagesize) || PAGINATION.DEFAULT_PAGE_SIZE;
+  const currentPage = parseInt(req.query.page) || PAGINATION.DEFAULT_PAGE;
 
-exports.createBlog = async(req , res , next)=>{
-    const blog = new Blog({
-        image : req.body.image,
+  // Get blogs with pagination
+  const blogs = await Blog.find()
+    .skip(pageSize * (currentPage - 1))
+    .limit(pageSize)
+    .sort({ createdAt: -1 });
+
+  // Get total count
+  const totalBlogs = await Blog.countDocuments();
+
+  res.status(200).json({
+    status: "success",
+    message: "Blogs fetched successfully",
+    blogs,
+    maxBlogs: totalBlogs,
+    pagination: {
+      currentPage,
+      pageSize,
+      totalBlogs,
+      totalPages: Math.ceil(totalBlogs / pageSize),
+    },
+  });
+});
+
+/**
+ * Create a new blog
+ * POST /api/blogs
+ */
+exports.createBlog = asyncHandler(async (req, res, next) => {
+  const { image } = req.body;
+
+  if (!image || !image.trim()) {
+    return res.status(400).json({
+      status: "fail",
+      message: "Image URL is required",
     });
-    await blog
-        .save()
-        .then((result)=>{
-            res.status(201).json({
-                message:"Blog added sucessfully",
-                blog: {
-                    ...result._doc,
-                    id: result._id,
-                },
-            });
-        })
-        .catch((err)=>{
-            res.status(500).json({
-                message: "Fail to create Blog!",
-                error : err,
-            })
-        })
-}
+  }
 
-exports.getBlogById = async(req, res , next)=>{
-    await Blog.findById(req.params.id)
-        .then((blog)=>{
-            if(blog){
-                res.status(200).json(blog);
-            }
-            else{
-                res.status(404).json({message: "Blog not Found!"})
-            }
-        })
-        .catch((err)=>{
-            res.status(500).json({
-                message: "Fetching blog failed",
-            });
-        });
-}
+  const blog = new Blog({
+    image: image.trim(),
+  });
 
-exports.updateBlog = async(req , res , next)=>{
+  const savedBlog = await blog.save();
 
-    await Blog.updateOne({_id: req.params.id}, req.body)
-        .then((result)=>{
-            res.status(200).json({message:"Update is successful!"});
-        })
-        .catch((err)=>{
-            res.status(500).json({
-                message: "Couldn't update blog!",
-                error : err,
-            })
-        })
-}
+  res.status(201).json({
+    status: "success",
+    message: SUCCESS_MESSAGES.BLOG_CREATED,
+    blog: {
+      ...savedBlog._doc,
+      id: savedBlog._id,
+    },
+  });
+});
 
-exports.deleteBlog = async(req, res, next) =>{
-    await Blog.deleteOne({ _id: req.params.id })
-    .then((resp) =>{
-       res.status (200).json({ message: "Delete is successful!" });
-    })
-    .catch((error) =>{
-        res.status (500).json({
-            message: "Couldn't delete blog!",
-            err: error
-        });
+/**
+ * Get blog by ID
+ * GET /api/blogs/:id
+ */
+exports.getBlogById = asyncHandler(async (req, res, next) => {
+  const blog = await Blog.findById(req.params.id);
+
+  if (!blog) {
+    return res.status(404).json({
+      status: "fail",
+      message: ERROR_MESSAGES.BLOG_NOT_FOUND,
     });
-};
+  }
 
-exports.searchBlogs = async(req,res,next) =>{
-    const query = req.query.query
-    await Blog.find({
-        $or: [
-            {
-              nom: {
-                $regex: ".*" + query + ".*",
-                $options: "i",
-              },
-            },
-            {
-              prenom: {
-                $regex: ".*" + query + ".*",
-                $options: "i",
-              },
-            },
-            {
-                pays: {
-                  $regex: ".*" + query + ".*",
-                  $options: "i",
-                },
-            },
-            {
-                number: {
-                  $regex: ".*" + query + ".*",
-                  $options: "i",
-                },
-            },
-            {
-                email: {
-                  $regex: ".*" + query + ".*",
-                  $options: "i",
-                },
-            }
-          ],
-        })
-        .then((resp) =>{
-            res.status (200).json({ 
-                data : resp
+  res.status(200).json({
+    status: "success",
+    data: blog,
+    ...blog._doc,
+  });
+});
 
-            });
-         })
-         .catch((error) =>{
-             res.status (500).json({
-                 message: "Couldn't found any blog!",
-                 err: error
-             });
-         });
-        
-};
+/**
+ * Update blog
+ * PUT /api/blogs/:id
+ */
+exports.updateBlog = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+  const { image } = req.body;
+
+  // Check if blog exists
+  const existingBlog = await Blog.findById(id);
+  if (!existingBlog) {
+    return res.status(404).json({
+      status: "fail",
+      message: ERROR_MESSAGES.BLOG_NOT_FOUND,
+    });
+  }
+
+  // Update blog
+  const updateData = {
+    image: image?.trim() || existingBlog.image,
+  };
+
+  await Blog.findByIdAndUpdate(id, updateData);
+
+  res.status(200).json({
+    status: "success",
+    message: SUCCESS_MESSAGES.BLOG_UPDATED,
+  });
+});
+
+/**
+ * Delete blog
+ * DELETE /api/blogs/:id
+ */
+exports.deleteBlog = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+
+  const blog = await Blog.findById(id);
+  if (!blog) {
+    return res.status(404).json({
+      status: "fail",
+      message: ERROR_MESSAGES.BLOG_NOT_FOUND,
+    });
+  }
+
+  await Blog.findByIdAndDelete(id);
+
+  res.status(200).json({
+    status: "success",
+    message: SUCCESS_MESSAGES.BLOG_DELETED,
+  });
+});
+
+/**
+ * Search blogs
+ * POST /api/blogs/search
+ */
+exports.searchBlogs = asyncHandler(async (req, res, next) => {
+  const query = req.query.query || req.body.query;
+
+  if (!query || query.trim().length < 2) {
+    return res.status(400).json({
+      status: "fail",
+      message: "Search query must be at least 2 characters",
+    });
+  }
+
+  const searchRegex = new RegExp(query.trim(), "i");
+
+  const blogs = await Blog.find({
+    image: searchRegex,
+  }).sort({ createdAt: -1 });
+
+  res.status(200).json({
+    status: "success",
+    data: blogs,
+    count: blogs.length,
+  });
+});

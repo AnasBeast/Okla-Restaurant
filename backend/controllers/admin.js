@@ -1,117 +1,175 @@
 const User = require("../models/admin");
-var bcrypt = require('bcryptjs');
-var jwt = require('jsonwebtoken');
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { asyncHandler, AppError } = require("../middleware/errorHandler");
+const {
+  JWT_CONFIG,
+  ERROR_MESSAGES,
+  SUCCESS_MESSAGES,
+} = require("../config/constants");
 
-exports.createUser = async (req, res , next)=>{
-    try {
-        // Get user input
-        const { email, password } = req.body;
-        // Validate user input
-        if (!(email && password )) {
-          res.status(400).send("All input is required");
-        }
-    
-        // check if user already exist
-        // Validate if user exist in our database
-        const oldUser = await User.findOne({ email });
-    
-        if (oldUser) {
-          return res.status(409).send("User Already Exist. Please Login");
-        }
-    
-        //Encrypt user password
-        encryptedPassword = await bcrypt.hash(password, 10);
+/**
+ * Create a new admin user
+ * POST /api/admin/register
+ */
+exports.createUser = asyncHandler(async (req, res, next) => {
+  const { email, password } = req.body;
 
-        // Create token
-        const token = jwt.sign(
-          { encryptedPassword, email },
-          process.env.TOKEN_KEY,
-          {
-            expiresIn: "2h",
-          }
-        );
-        // Create user in our database
-        const user = await User.create({
-          email: email.toLowerCase(), // sanitize: convert email to lowercase
-          password: encryptedPassword,
-          token : token
-        });
-    
-       
-        // save user token
-        user.token = token;
-    
-        // return new user
-        res.status(201).json(user);
-      } catch (err) {
-        console.log(err);
-      }
-}
-
-exports.loginUser = async (req , res , next)=>{
-    // Our login logic starts here
-  try {
-    // Get user input
-    const { email, password } = req.body;
-
-    // Validate user input
-    if (!(email && password)) {
-      res.status(400).send("All input is required");
-    }
-    // Validate if user exist in our database
-    const user = await User.findOne({ email });
-
-    if (user && (await bcrypt.compare(password, user.password))) {
-      // Create token
-      const token = jwt.sign(
-        { user_id: user._id, email },
-        process.env.TOKEN_KEY,
-        {
-          expiresIn: "2h",
-        }
-      );
-
-      // save user token
-      user.token = token;
-      await User.updateOne({_id: user._id}, user)
-
-      // user
-      res.status(200).json(user);
-    }else{
-      res.status(401).send("Invalid Credentials");
-    }
-    console.log(user)
-  } catch (err) {
-    console.log(err);
+  // Check if user already exists
+  const existingUser = await User.findOne({ email: email.toLowerCase() });
+  if (existingUser) {
+    return res.status(409).json({
+      status: "fail",
+      message: ERROR_MESSAGES.USER_EXISTS,
+    });
   }
-  // Our register logic ends here
-}
 
-exports.checkUser = async (req , res , next)=>{
-  // Our login logic starts here
-try {
-  // Get user input
+  // Hash password
+  const hashedPassword = await bcrypt.hash(password, 12);
+
+  // Create user
+  const user = await User.create({
+    email: email.toLowerCase(),
+    password: hashedPassword,
+  });
+
+  // Generate token
+  const token = jwt.sign(
+    { userId: user._id, email: user.email },
+    process.env.TOKEN_KEY,
+    { expiresIn: JWT_CONFIG.EXPIRATION },
+  );
+
+  // Update user with token
+  user.token = token;
+  await user.save();
+
+  res.status(201).json({
+    status: "success",
+    message: "User created successfully",
+    data: {
+      id: user._id,
+      email: user.email,
+      token,
+    },
+  });
+});
+
+/**
+ * Login user
+ * POST /api/admin/login
+ */
+exports.loginUser = asyncHandler(async (req, res, next) => {
+  const { email, password } = req.body;
+
+  // Find user
+  const user = await User.findOne({ email: email.toLowerCase() });
+
+  if (!user) {
+    return res.status(401).json({
+      status: "fail",
+      message: ERROR_MESSAGES.INVALID_CREDENTIALS,
+    });
+  }
+
+  // Verify password
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordValid) {
+    return res.status(401).json({
+      status: "fail",
+      message: ERROR_MESSAGES.INVALID_CREDENTIALS,
+    });
+  }
+
+  // Generate new token
+  const token = jwt.sign(
+    { userId: user._id, email: user.email },
+    process.env.TOKEN_KEY,
+    { expiresIn: JWT_CONFIG.EXPIRATION },
+  );
+
+  // Update user token
+  user.token = token;
+  await user.save();
+
+  res.status(200).json({
+    status: "success",
+    message: SUCCESS_MESSAGES.LOGIN_SUCCESS,
+    data: {
+      id: user._id,
+      email: user.email,
+      token,
+    },
+  });
+});
+
+/**
+ * Verify user token
+ * POST /api/admin/checkuser
+ */
+exports.checkUser = asyncHandler(async (req, res, next) => {
   const token = req.body.token;
-  // Validate user input
-  jwt.verify(token, process.env.TOKEN_KEY, function(err, decoded) {
-    if (err) {
-      return res.status(403).json({
-        message : "Token expired, please login again !"
-      });/*
-        err = {
-          name: 'TokenExpiredError',
-          message: 'jwt expired',
-          expiredAt: 1408621000
-        }
-      */
-    }
-    else{
-      return res.status(200).json({
-        message : "User logged in!"
+
+  if (!token) {
+    return res.status(401).json({
+      status: "fail",
+      message: ERROR_MESSAGES.INVALID_TOKEN,
+    });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.TOKEN_KEY);
+
+    // Optionally verify user still exists
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      return res.status(401).json({
+        status: "fail",
+        message: ERROR_MESSAGES.INVALID_TOKEN,
       });
     }
+
+    res.status(200).json({
+      status: "success",
+      message: "Token is valid",
+      data: {
+        userId: decoded.userId,
+        email: decoded.email,
+      },
+    });
+  } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({
+        status: "fail",
+        message: ERROR_MESSAGES.TOKEN_EXPIRED,
+      });
+    }
+    return res.status(401).json({
+      status: "fail",
+      message: ERROR_MESSAGES.INVALID_TOKEN,
+    });
+  }
+});
+
+/**
+ * Logout user (invalidate token)
+ * POST /api/admin/logout
+ */
+exports.logoutUser = asyncHandler(async (req, res, next) => {
+  const token = req.body.token || req.headers["x-access-token"];
+
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.TOKEN_KEY);
+      await User.findByIdAndUpdate(decoded.userId, { token: null });
+    } catch (err) {
+      // Token already invalid, continue with logout
+    }
+  }
+
+  res.status(200).json({
+    status: "success",
+    message: SUCCESS_MESSAGES.LOGOUT_SUCCESS,
   });
-} catch (err) {
-  console.log(err);
-}
-}
+});
